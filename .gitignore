@@ -1,0 +1,8 @@
+GitExcelAddIn/.backgit
+.backgitignore
+.backgitattributes
+GitExcelAddIn/GitExcelAddIn/bin
+GitExcelAddIn/packages
+GitExcelAddIn/GitExcelAddIn/obj/x86/Debug
+GitExcelAddIn/GitExcelAddIn/obj
+GitExcelAddIn/.vs
