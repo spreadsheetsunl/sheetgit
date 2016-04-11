@@ -17,6 +17,8 @@ namespace GitExcelAddIn
     public partial class ThisAddIn
     {
         public Repository Repo;
+        public static string Username = "Daedren";
+        public static string Password = "FgTH&56R#nwh";
         public string FilePath;
 
 
@@ -96,6 +98,10 @@ namespace GitExcelAddIn
                 Thread.Sleep(2500);
                 Repository.Init(FilePath);
                 Repo = new Repository(FilePath);
+                //Check if remote exists
+                //https://api.bitbucket.org/2.0/repositories/{owner}/{repo_slug}
+                //https://api.bitbucket.org/2.0/repositories/{owner}
+
             }
         }
 

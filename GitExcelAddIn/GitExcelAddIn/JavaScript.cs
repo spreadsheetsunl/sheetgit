@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.SqlServer.Server;
 
 namespace GitExcelAddIn
 {
@@ -56,6 +57,13 @@ namespace GitExcelAddIn
 
             });
             t.Start();
+        }
+
+        public string LogIn(string username, string password)
+        {
+            ThisAddIn.Username = username;
+            ThisAddIn.Password = password;
+            return "asd";
         }
 
         private void insertColumn()
