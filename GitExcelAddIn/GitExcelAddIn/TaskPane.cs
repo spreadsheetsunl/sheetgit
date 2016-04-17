@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Gma.System.MouseKeyHook;
 using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SharpBucket.Authentication;
 using SharpBucket.V1;
@@ -243,6 +244,19 @@ namespace GitExcelAddIn
             Bitbucket.AuthenticateWithPin(code);
             bitbucketButton.Text = "Log out";
             bitbucketButton.Visible = true;
+        }
+
+        private void backLabelTab2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            tabControl1.SelectTab("tabPage1");
+        }
+
+        private void UserPassTab2Submit_Click(object sender, EventArgs e)
+        {
+            ThisAddIn.Info["username"] = UsernameTextTab2.Text;
+            ThisAddIn.Info["password"] = PasswordTextTab2.Text;
+            string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
+            File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
         }
 
 

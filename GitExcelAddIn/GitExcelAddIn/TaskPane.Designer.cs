@@ -37,6 +37,12 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.backLabelTab2 = new System.Windows.Forms.LinkLabel();
+            this.UsernameTab2 = new System.Windows.Forms.Label();
+            this.PasswordTab2 = new System.Windows.Forms.Label();
+            this.UsernameTextTab2 = new System.Windows.Forms.TextBox();
+            this.PasswordTextTab2 = new System.Windows.Forms.TextBox();
+            this.UserPassTab2Submit = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -110,6 +116,12 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.UserPassTab2Submit);
+            this.tabPage2.Controls.Add(this.PasswordTextTab2);
+            this.tabPage2.Controls.Add(this.UsernameTextTab2);
+            this.tabPage2.Controls.Add(this.PasswordTab2);
+            this.tabPage2.Controls.Add(this.UsernameTab2);
+            this.tabPage2.Controls.Add(this.backLabelTab2);
             this.tabPage2.Controls.Add(this.bitbucketButton);
             this.tabPage2.Controls.Add(this.label1);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -122,7 +134,7 @@
             // 
             // bitbucketButton
             // 
-            this.bitbucketButton.Location = new System.Drawing.Point(10, 24);
+            this.bitbucketButton.Location = new System.Drawing.Point(10, 53);
             this.bitbucketButton.Name = "bitbucketButton";
             this.bitbucketButton.Size = new System.Drawing.Size(174, 23);
             this.bitbucketButton.TabIndex = 1;
@@ -133,11 +145,65 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 7);
+            this.label1.Location = new System.Drawing.Point(7, 37);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(95, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "BitBucket account";
+            // 
+            // backLabelTab2
+            // 
+            this.backLabelTab2.AutoSize = true;
+            this.backLabelTab2.Location = new System.Drawing.Point(10, 7);
+            this.backLabelTab2.Name = "backLabelTab2";
+            this.backLabelTab2.Size = new System.Drawing.Size(41, 13);
+            this.backLabelTab2.TabIndex = 2;
+            this.backLabelTab2.TabStop = true;
+            this.backLabelTab2.Text = "< Back";
+            this.backLabelTab2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.backLabelTab2_LinkClicked);
+            // 
+            // UsernameTab2
+            // 
+            this.UsernameTab2.AutoSize = true;
+            this.UsernameTab2.Location = new System.Drawing.Point(10, 86);
+            this.UsernameTab2.Name = "UsernameTab2";
+            this.UsernameTab2.Size = new System.Drawing.Size(55, 13);
+            this.UsernameTab2.TabIndex = 3;
+            this.UsernameTab2.Text = "Username";
+            // 
+            // PasswordTab2
+            // 
+            this.PasswordTab2.AutoSize = true;
+            this.PasswordTab2.Location = new System.Drawing.Point(10, 113);
+            this.PasswordTab2.Name = "PasswordTab2";
+            this.PasswordTab2.Size = new System.Drawing.Size(53, 13);
+            this.PasswordTab2.TabIndex = 4;
+            this.PasswordTab2.Text = "Password";
+            // 
+            // UsernameTextTab2
+            // 
+            this.UsernameTextTab2.Location = new System.Drawing.Point(71, 84);
+            this.UsernameTextTab2.Name = "UsernameTextTab2";
+            this.UsernameTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.UsernameTextTab2.TabIndex = 5;
+            // 
+            // PasswordTextTab2
+            // 
+            this.PasswordTextTab2.Location = new System.Drawing.Point(71, 110);
+            this.PasswordTextTab2.Name = "PasswordTextTab2";
+            this.PasswordTextTab2.PasswordChar = '*';
+            this.PasswordTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.PasswordTextTab2.TabIndex = 6;
+            // 
+            // UserPassTab2Submit
+            // 
+            this.UserPassTab2Submit.Location = new System.Drawing.Point(51, 136);
+            this.UserPassTab2Submit.Name = "UserPassTab2Submit";
+            this.UserPassTab2Submit.Size = new System.Drawing.Size(101, 23);
+            this.UserPassTab2Submit.TabIndex = 7;
+            this.UserPassTab2Submit.Text = "Update";
+            this.UserPassTab2Submit.UseVisualStyleBackColor = true;
+            this.UserPassTab2Submit.Click += new System.EventHandler(this.UserPassTab2Submit_Click);
             // 
             // TaskPane
             // 
@@ -167,5 +233,11 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button bitbucketButton;
+        private System.Windows.Forms.LinkLabel backLabelTab2;
+        private System.Windows.Forms.Button UserPassTab2Submit;
+        private System.Windows.Forms.TextBox PasswordTextTab2;
+        private System.Windows.Forms.TextBox UsernameTextTab2;
+        private System.Windows.Forms.Label PasswordTab2;
+        private System.Windows.Forms.Label UsernameTab2;
     }
 }

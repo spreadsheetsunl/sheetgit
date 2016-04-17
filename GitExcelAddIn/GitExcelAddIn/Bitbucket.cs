@@ -88,35 +88,40 @@ namespace GitExcelAddIn
             return new Tuple<RestClient, RestRequest>(client,request);
         }
 
-        public static bool RepoExists(string name)
+        public static string RepoExists(string name)
         {
             Tuple<RestClient, RestRequest> t = PrepareRequest();
             t.Item2.Resource = "{name}";
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
             IRestResponse response = t.Item1.Execute(t.Item2);
             var content = JObject.Parse(response.Content);
-            List<string> nameList = new List<string>();
-            bool repoExists = false;
+            var repoExists = "";
             foreach (JObject value in content["values"].Children<JObject>())
             {
-              if(value["name"].ToString() == name+"-SheetGit") repoExists = true;  
+                if (value["name"].ToString() == name + "-SheetGit")
+                {
+                    repoExists = value["links"]["clone"][0]["href"].ToString();
+                }  
             }
             return repoExists;
         }
 
-        public static void CreateRepo(string name)
+        public static string CreateRepo(string name)
         {
             Tuple<RestClient, RestRequest> t = PrepareRequest();
             t.Item2.Method = Method.POST;
             t.Item2.Resource = "{name}/{slug}";
-            t.Item2.AddUrlSegment("name", "repositories/Raikon/");
-            t.Item2.AddUrlSegment("slug", GenerateSlug(name+"-SheetGit"));
+            t.Item2.AddParameter("is_private", "true");
+            t.Item2.AddUrlSegment("name", "repositories/Raikon");
+            t.Item2.AddUrlSegment("slug", GenerateSlug("SheetGit "+name));
             IRestResponse response = t.Item1.Execute(t.Item2);
+            var content = JArray.Parse(response.Content);
+            return content["links"]["clone"][0]["href"].ToString();
         }
 
         private static string GenerateSlug(string phrase)
         {
-            string str = RemoveAccent(phrase).ToLower();
+            string str = RemoveAccent(phrase).ToLower().Split('.')[0];
             str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
             str = Regex.Replace(str, @"\s+", " ").Trim();
             str = str.Substring(0, str.Length <= 45 ? str.Length : 45).Trim();

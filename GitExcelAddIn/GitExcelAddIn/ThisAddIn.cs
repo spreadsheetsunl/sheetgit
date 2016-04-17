@@ -86,8 +86,8 @@ namespace GitExcelAddIn
                             (url, usernameFromUrl, types) =>
                                 new UsernamePasswordCredentials()
                                 {
-                                    Username = "Raikon",
-                                    Password = "FgTH&56R#nwh"
+                                    Username = Info["username"].ToString(),
+                                    Password = Info["password"].ToString()
                                 });
                         Repo.Network.Push(Repo.Branches["James"], options);
                     }
@@ -121,16 +121,23 @@ namespace GitExcelAddIn
 
             if (!string.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath))
             {
+                FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
                 Directory.CreateDirectory(FilePath);
                 Thread.Sleep(2500);
                 Repository.Init(FilePath);
                 Repo = new Repository(FilePath);
                 //Check if remote exists
-                if (!Bitbucket.RepoExists(wb.Name))
+                var url = Bitbucket.RepoExists(wb.Name);
+                if (string.IsNullOrEmpty(url))
                 {
-                    Bitbucket.CreateRepo(wb.Name);
+                    url = Bitbucket.CreateRepo(wb.Name);
                     
                 }
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Repo.Network.Remotes.Add("origin", url);
+                }
+
                 //https://api.bitbucket.org/2.0/repositories/{owner}/{repo_slug}
                 //https://api.bitbucket.org/2.0/repositories/{owner}
 
