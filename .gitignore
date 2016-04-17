@@ -7,3 +7,4 @@ GitExcelAddIn/GitExcelAddIn/obj/x86/Debug
 GitExcelAddIn/GitExcelAddIn/obj
 GitExcelAddIn/.vs
 ._.DS_Store
+._.gitignore
