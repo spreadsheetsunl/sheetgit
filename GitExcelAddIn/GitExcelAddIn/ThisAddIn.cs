@@ -8,18 +8,20 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Gma.System.MouseKeyHook;
 using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
+using Newtonsoft.Json.Linq;
 
 namespace GitExcelAddIn
 {
     public partial class ThisAddIn
     {
         public Repository Repo;
-        public static string Username = "Daedren";
-        public static string Password = "FgTH&56R#nwh";
         public string FilePath;
+        public static JObject Info;
+        public static string CodeLocation;
 
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
@@ -27,7 +29,14 @@ namespace GitExcelAddIn
             System.Diagnostics.Debug.WriteLine("Plugin initiated");
             this.Application.WorkbookOpen += new Excel.AppEvents_WorkbookOpenEventHandler(Application_WorkbookStart);
             ((Excel.AppEvents_Event)this.Application).NewWorkbook += new Excel.AppEvents_NewWorkbookEventHandler(Application_WorkbookStart);
+
+            var codePath = new Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+            CodeLocation = Path.GetDirectoryName(codePath.LocalPath.ToString());
+
+            var infoText = File.ReadAllText($"{CodeLocation}/info.json");
             
+            Info = JObject.Parse(infoText);
+
             var myUserControl1 = new TaskPane();
             var myCustomTaskPane = this.CustomTaskPanes.Add(myUserControl1, "SheetGit");
             myCustomTaskPane.Visible = true;
@@ -46,7 +55,7 @@ namespace GitExcelAddIn
             System.Diagnostics.Debug.WriteLine("Workbook Opened or Created");
             this.Application.SheetChange += new Excel.AppEvents_SheetChangeEventHandler(Application_SheetChange);
             this.Application.SheetCalculate += new Excel.AppEvents_SheetCalculateEventHandler(Application_SheetCalculate);
-            FilePath = $"{wb.Path}\\{wb.Name.Split('.')[0]}";
+            FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
             System.Diagnostics.Debug.WriteLine(FilePath);
             System.Diagnostics.Debug.WriteLine(wb.Path+"\\"+wb.Name);
 
@@ -57,7 +66,7 @@ namespace GitExcelAddIn
             System.Diagnostics.Debug.WriteLine("Worksheet Changed");
             Excel.Worksheet sheet = (Excel.Worksheet)sh;
             var wb = this.Application.ActiveWorkbook;
-            if (!string.IsNullOrEmpty(wb.Path))
+            if (!string.IsNullOrEmpty(wb.Path)) //ficheiro já foi salvo
             {
                 this.Application.ActiveWorkbook.Save();
                 InitRepo();
@@ -68,8 +77,26 @@ namespace GitExcelAddIn
                 {
                     Signature author = new Signature("James", "@test.com", DateTime.Now);
                     Signature committer = author;
-                    Repo.Stage("*");
+                    Repo.Stage(wb.Name);
                     Repo.Commit("message",author,committer);
+                    if (Repo.Network.Remotes.Any())
+                    {
+                        LibGit2Sharp.PushOptions options = new LibGit2Sharp.PushOptions();
+                        options.CredentialsProvider = new CredentialsHandler(
+                            (url, usernameFromUrl, types) =>
+                                new UsernamePasswordCredentials()
+                                {
+                                    Username = "Raikon",
+                                    Password = "FgTH&56R#nwh"
+                                });
+                        Repo.Network.Push(Repo.Branches["James"], options);
+                    }
+                    else if (Info["refreshToken"] != null)
+                    {
+                        //check if remote repos exist
+                        //if not, create
+                        //create push options
+                    }
                 }
             }
 
@@ -99,6 +126,11 @@ namespace GitExcelAddIn
                 Repository.Init(FilePath);
                 Repo = new Repository(FilePath);
                 //Check if remote exists
+                if (!Bitbucket.RepoExists(wb.Name))
+                {
+                    Bitbucket.CreateRepo(wb.Name);
+                    
+                }
                 //https://api.bitbucket.org/2.0/repositories/{owner}/{repo_slug}
                 //https://api.bitbucket.org/2.0/repositories/{owner}
 

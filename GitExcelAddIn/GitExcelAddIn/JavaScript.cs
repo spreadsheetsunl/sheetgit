@@ -59,13 +59,6 @@ namespace GitExcelAddIn
             t.Start();
         }
 
-        public string LogIn(string username, string password)
-        {
-            ThisAddIn.Username = username;
-            ThisAddIn.Password = password;
-            return "asd";
-        }
-
         private void insertColumn()
         {
             VirtualMouse.MoveMouse(309, 388, 20);

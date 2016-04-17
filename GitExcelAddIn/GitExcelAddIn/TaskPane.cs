@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Gma.System.MouseKeyHook;
 using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json.Linq;
+using SharpBucket.Authentication;
+using SharpBucket.V1;
 using Range = Microsoft.Office.Interop.Excel.Range;
 
 namespace GitExcelAddIn
@@ -20,6 +24,8 @@ namespace GitExcelAddIn
 
         private int _previousValue = 5;
         private IKeyboardMouseEvents _m_GlobalHook;
+        private OAuthentication3Legged _authenticator;
+        private SharpBucketV1 _sharpBucket;
 
         public TaskPane()
         {
@@ -38,6 +44,10 @@ namespace GitExcelAddIn
             webBrowser1.Document.InvokeScript("ConsoleMessage", o);
 
             webBrowser1.DocumentCompleted += webBrowser1_DocumentCompleted;
+
+            tabControl1.Appearance = TabAppearance.FlatButtons;
+            tabControl1.ItemSize = new Size(0, 1);
+            tabControl1.SizeMode = TabSizeMode.Fixed;
 
             Subscribe();
         }
@@ -62,8 +72,6 @@ namespace GitExcelAddIn
         {
             // Resize the window
             int height = webBrowser1.Document.Body.ScrollRectangle.Size.Height;
-            System.Diagnostics.Debug.WriteLine(height);
-            System.Diagnostics.Debug.WriteLine(webBrowser1.Height);
             height = Math.Max(height, webBrowser1.Height);
             /*            webBrowser1.Document.Body.Style = "overflow:hidden";*/
 
@@ -207,7 +215,34 @@ namespace GitExcelAddIn
 
         private void buttonSettings_Click(object sender, EventArgs e)
         {
+            tabControl1.SelectTab("tabPage2");
+        }
 
+        private void bitbucketButton_Click(object sender, EventArgs e)
+        {
+            var uri = Bitbucket.StartAuthentication();
+            if (uri != "")
+            {
+                //Process.Start(uri);
+                BrowserForm bform = new BrowserForm(uri, this);
+                bform.Show();
+                //bitbucketPinText.Visible = true;
+                //bitbucketButton.Visible = false;
+                //bitbucketSubmitButton.Visible = true;
+            }
+            else
+            {
+                bitbucketButton.Text = "Log out";
+            }
+            
+            
+        }
+
+        protected internal void readyForPin(string code)
+        {
+            Bitbucket.AuthenticateWithPin(code);
+            bitbucketButton.Text = "Log out";
+            bitbucketButton.Visible = true;
         }
 
 
