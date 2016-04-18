@@ -35,14 +35,20 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.UserPassTab2Submit = new System.Windows.Forms.Button();
+            this.PasswordTextTab2 = new System.Windows.Forms.TextBox();
+            this.UsernameTextTab2 = new System.Windows.Forms.TextBox();
+            this.PasswordTab2 = new System.Windows.Forms.Label();
+            this.UsernameTab2 = new System.Windows.Forms.Label();
+            this.backLabelTab2 = new System.Windows.Forms.LinkLabel();
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.backLabelTab2 = new System.Windows.Forms.LinkLabel();
-            this.UsernameTab2 = new System.Windows.Forms.Label();
-            this.PasswordTab2 = new System.Windows.Forms.Label();
-            this.UsernameTextTab2 = new System.Windows.Forms.TextBox();
-            this.PasswordTextTab2 = new System.Windows.Forms.TextBox();
-            this.UserPassTab2Submit = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.GitNameTextTab2 = new System.Windows.Forms.TextBox();
+            this.GitEmailTextTab2 = new System.Windows.Forms.TextBox();
+            this.GitInfoTab2Button = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -116,6 +122,12 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.GitInfoTab2Button);
+            this.tabPage2.Controls.Add(this.GitEmailTextTab2);
+            this.tabPage2.Controls.Add(this.GitNameTextTab2);
+            this.tabPage2.Controls.Add(this.label5);
+            this.tabPage2.Controls.Add(this.label4);
+            this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.UserPassTab2Submit);
             this.tabPage2.Controls.Add(this.PasswordTextTab2);
             this.tabPage2.Controls.Add(this.UsernameTextTab2);
@@ -131,6 +143,60 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // UserPassTab2Submit
+            // 
+            this.UserPassTab2Submit.Location = new System.Drawing.Point(51, 136);
+            this.UserPassTab2Submit.Name = "UserPassTab2Submit";
+            this.UserPassTab2Submit.Size = new System.Drawing.Size(101, 23);
+            this.UserPassTab2Submit.TabIndex = 7;
+            this.UserPassTab2Submit.Text = "Update";
+            this.UserPassTab2Submit.UseVisualStyleBackColor = true;
+            this.UserPassTab2Submit.Click += new System.EventHandler(this.UserPassTab2Submit_Click);
+            // 
+            // PasswordTextTab2
+            // 
+            this.PasswordTextTab2.Location = new System.Drawing.Point(71, 110);
+            this.PasswordTextTab2.Name = "PasswordTextTab2";
+            this.PasswordTextTab2.PasswordChar = '*';
+            this.PasswordTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.PasswordTextTab2.TabIndex = 6;
+            // 
+            // UsernameTextTab2
+            // 
+            this.UsernameTextTab2.Location = new System.Drawing.Point(71, 84);
+            this.UsernameTextTab2.Name = "UsernameTextTab2";
+            this.UsernameTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.UsernameTextTab2.TabIndex = 5;
+            // 
+            // PasswordTab2
+            // 
+            this.PasswordTab2.AutoSize = true;
+            this.PasswordTab2.Location = new System.Drawing.Point(10, 113);
+            this.PasswordTab2.Name = "PasswordTab2";
+            this.PasswordTab2.Size = new System.Drawing.Size(53, 13);
+            this.PasswordTab2.TabIndex = 4;
+            this.PasswordTab2.Text = "Password";
+            // 
+            // UsernameTab2
+            // 
+            this.UsernameTab2.AutoSize = true;
+            this.UsernameTab2.Location = new System.Drawing.Point(10, 86);
+            this.UsernameTab2.Name = "UsernameTab2";
+            this.UsernameTab2.Size = new System.Drawing.Size(55, 13);
+            this.UsernameTab2.TabIndex = 3;
+            this.UsernameTab2.Text = "Username";
+            // 
+            // backLabelTab2
+            // 
+            this.backLabelTab2.AutoSize = true;
+            this.backLabelTab2.Location = new System.Drawing.Point(10, 7);
+            this.backLabelTab2.Name = "backLabelTab2";
+            this.backLabelTab2.Size = new System.Drawing.Size(41, 13);
+            this.backLabelTab2.TabIndex = 2;
+            this.backLabelTab2.TabStop = true;
+            this.backLabelTab2.Text = "< Back";
+            this.backLabelTab2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.backLabelTab2_LinkClicked);
             // 
             // bitbucketButton
             // 
@@ -151,59 +217,56 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "BitBucket account";
             // 
-            // backLabelTab2
+            // label2
             // 
-            this.backLabelTab2.AutoSize = true;
-            this.backLabelTab2.Location = new System.Drawing.Point(10, 7);
-            this.backLabelTab2.Name = "backLabelTab2";
-            this.backLabelTab2.Size = new System.Drawing.Size(41, 13);
-            this.backLabelTab2.TabIndex = 2;
-            this.backLabelTab2.TabStop = true;
-            this.backLabelTab2.Text = "< Back";
-            this.backLabelTab2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.backLabelTab2_LinkClicked);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 169);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(164, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "User information on your Versions";
             // 
-            // UsernameTab2
+            // label4
             // 
-            this.UsernameTab2.AutoSize = true;
-            this.UsernameTab2.Location = new System.Drawing.Point(10, 86);
-            this.UsernameTab2.Name = "UsernameTab2";
-            this.UsernameTab2.Size = new System.Drawing.Size(55, 13);
-            this.UsernameTab2.TabIndex = 3;
-            this.UsernameTab2.Text = "Username";
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 193);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(35, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Name";
             // 
-            // PasswordTab2
+            // label5
             // 
-            this.PasswordTab2.AutoSize = true;
-            this.PasswordTab2.Location = new System.Drawing.Point(10, 113);
-            this.PasswordTab2.Name = "PasswordTab2";
-            this.PasswordTab2.Size = new System.Drawing.Size(53, 13);
-            this.PasswordTab2.TabIndex = 4;
-            this.PasswordTab2.Text = "Password";
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(13, 220);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(32, 13);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Email";
             // 
-            // UsernameTextTab2
+            // GitNameTextTab2
             // 
-            this.UsernameTextTab2.Location = new System.Drawing.Point(71, 84);
-            this.UsernameTextTab2.Name = "UsernameTextTab2";
-            this.UsernameTextTab2.Size = new System.Drawing.Size(113, 20);
-            this.UsernameTextTab2.TabIndex = 5;
+            this.GitNameTextTab2.Location = new System.Drawing.Point(71, 190);
+            this.GitNameTextTab2.Name = "GitNameTextTab2";
+            this.GitNameTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.GitNameTextTab2.TabIndex = 11;
             // 
-            // PasswordTextTab2
+            // GitEmailTextTab2
             // 
-            this.PasswordTextTab2.Location = new System.Drawing.Point(71, 110);
-            this.PasswordTextTab2.Name = "PasswordTextTab2";
-            this.PasswordTextTab2.PasswordChar = '*';
-            this.PasswordTextTab2.Size = new System.Drawing.Size(113, 20);
-            this.PasswordTextTab2.TabIndex = 6;
+            this.GitEmailTextTab2.Location = new System.Drawing.Point(71, 217);
+            this.GitEmailTextTab2.Name = "GitEmailTextTab2";
+            this.GitEmailTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.GitEmailTextTab2.TabIndex = 12;
             // 
-            // UserPassTab2Submit
+            // GitInfoTab2Button
             // 
-            this.UserPassTab2Submit.Location = new System.Drawing.Point(51, 136);
-            this.UserPassTab2Submit.Name = "UserPassTab2Submit";
-            this.UserPassTab2Submit.Size = new System.Drawing.Size(101, 23);
-            this.UserPassTab2Submit.TabIndex = 7;
-            this.UserPassTab2Submit.Text = "Update";
-            this.UserPassTab2Submit.UseVisualStyleBackColor = true;
-            this.UserPassTab2Submit.Click += new System.EventHandler(this.UserPassTab2Submit_Click);
+            this.GitInfoTab2Button.Location = new System.Drawing.Point(51, 244);
+            this.GitInfoTab2Button.Name = "GitInfoTab2Button";
+            this.GitInfoTab2Button.Size = new System.Drawing.Size(101, 23);
+            this.GitInfoTab2Button.TabIndex = 13;
+            this.GitInfoTab2Button.Text = "Update";
+            this.GitInfoTab2Button.UseVisualStyleBackColor = true;
+            this.GitInfoTab2Button.Click += new System.EventHandler(this.GitInfoTab2Button_Click);
             // 
             // TaskPane
             // 
@@ -239,5 +302,11 @@
         private System.Windows.Forms.TextBox UsernameTextTab2;
         private System.Windows.Forms.Label PasswordTab2;
         private System.Windows.Forms.Label UsernameTab2;
+        private System.Windows.Forms.Button GitInfoTab2Button;
+        private System.Windows.Forms.TextBox GitEmailTextTab2;
+        private System.Windows.Forms.TextBox GitNameTextTab2;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label2;
     }
 }

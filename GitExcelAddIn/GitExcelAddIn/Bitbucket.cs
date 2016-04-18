@@ -115,7 +115,7 @@ namespace GitExcelAddIn
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
             t.Item2.AddUrlSegment("slug", GenerateSlug("SheetGit "+name));
             IRestResponse response = t.Item1.Execute(t.Item2);
-            var content = JArray.Parse(response.Content);
+            var content = JObject.Parse(response.Content);
             return content["links"]["clone"][0]["href"].ToString();
         }
 

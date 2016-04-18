@@ -34,7 +34,7 @@ namespace GitExcelAddIn
             CodeLocation = Path.GetDirectoryName(codePath.LocalPath.ToString());
 
             var infoText = File.ReadAllText($"{CodeLocation}/info.json");
-            
+
             Info = JObject.Parse(infoText);
 
             var myUserControl1 = new TaskPane();
@@ -57,7 +57,7 @@ namespace GitExcelAddIn
             this.Application.SheetCalculate += new Excel.AppEvents_SheetCalculateEventHandler(Application_SheetCalculate);
             FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
             System.Diagnostics.Debug.WriteLine(FilePath);
-            System.Diagnostics.Debug.WriteLine(wb.Path+"\\"+wb.Name);
+            System.Diagnostics.Debug.WriteLine(wb.Path + "\\" + wb.Name);
 
         }
 
@@ -70,15 +70,15 @@ namespace GitExcelAddIn
             {
                 this.Application.ActiveWorkbook.Save();
                 InitRepo();
-                wb.SaveCopyAs(FilePath+"\\"+wb.Name);
+                wb.SaveCopyAs(FilePath + "\\" + wb.Name);
                 RepositoryStatus status = Repo.RetrieveStatus();
 
                 if (status.IsDirty)
                 {
-                    Signature author = new Signature("James", "@test.com", DateTime.Now);
+                    Signature author = new Signature(Info["name"].ToString(), Info["email"].ToString(), DateTime.Now);
                     Signature committer = author;
                     Repo.Stage(wb.Name);
-                    Repo.Commit("message",author,committer);
+                    Repo.Commit("message", author, committer);
                     if (Repo.Network.Remotes.Any())
                     {
                         LibGit2Sharp.PushOptions options = new LibGit2Sharp.PushOptions();
@@ -89,7 +89,7 @@ namespace GitExcelAddIn
                                     Username = Info["username"].ToString(),
                                     Password = Info["password"].ToString()
                                 });
-                        Repo.Network.Push(Repo.Branches["James"], options);
+                        Repo.Network.Push(Repo.Head, options);
                     }
                     else if (Info["refreshToken"] != null)
                     {
@@ -119,28 +119,36 @@ namespace GitExcelAddIn
         {
             var wb = this.Application.ActiveWorkbook;
 
+            FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
             if (!string.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath))
             {
-                FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
                 Directory.CreateDirectory(FilePath);
                 Thread.Sleep(2500);
                 Repository.Init(FilePath);
                 Repo = new Repository(FilePath);
                 //Check if remote exists
+                //Repo.CreateBranch("master");
                 var url = Bitbucket.RepoExists(wb.Name);
                 if (string.IsNullOrEmpty(url))
                 {
                     url = Bitbucket.CreateRepo(wb.Name);
-                    
+
                 }
                 if (!string.IsNullOrEmpty(url))
                 {
-                    Repo.Network.Remotes.Add("origin", url);
+
+                    Remote remote = Repo.Network.Remotes.Add("origin", url);
+                    Repo.Branches.Update(Repo.Head,
+                        b => b.Remote = remote.Name,
+                        b => b.UpstreamBranch = "refs/heads/"+Info["name"].ToString());
+
                 }
+                System.Diagnostics.Debug.WriteLine("Branches: "+Repo.Head.CanonicalName);
 
-                //https://api.bitbucket.org/2.0/repositories/{owner}/{repo_slug}
-                //https://api.bitbucket.org/2.0/repositories/{owner}
-
+            }
+            else
+            {
+                Repo = new Repository(FilePath);
             }
         }
 

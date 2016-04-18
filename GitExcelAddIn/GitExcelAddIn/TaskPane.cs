@@ -259,6 +259,14 @@ namespace GitExcelAddIn
             File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
         }
 
+        private void GitInfoTab2Button_Click(object sender, EventArgs e)
+        {
+            ThisAddIn.Info["name"] = GitNameTextTab2.Text;
+            ThisAddIn.Info["email"] = GitEmailTextTab2.Text;
+            string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
+            File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
+        }
+
 
         /*       public void Unsubscribe()
                {
