@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +34,11 @@ namespace GitExcelAddIn
         protected internal void initGraph()
         {
             Branch master = new Branch(null, "master");
+        }
+
+        protected internal static string GenerateFilePath(string fileName)
+        {
+            return Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sheetGit"), $"{fileName.Split('.')[0]}");
         }
 
 

@@ -164,6 +164,7 @@ function comTouch(commit) {
     console.log("You just clicked my commit.", commit);
     commit.dotColor = "white";
     commit.dotStrokeWidth = 10;
+    alert(window.external.GetGitLog());
 
     if (selectedCommit != null && commit != selectedCommit) {
         selectedCommit.dotColor = selectedCommit.dotStrokeColor;

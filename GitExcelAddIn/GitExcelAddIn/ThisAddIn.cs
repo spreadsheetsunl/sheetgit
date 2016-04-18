@@ -55,7 +55,7 @@ namespace GitExcelAddIn
             System.Diagnostics.Debug.WriteLine("Workbook Opened or Created");
             this.Application.SheetChange += new Excel.AppEvents_SheetChangeEventHandler(Application_SheetChange);
             this.Application.SheetCalculate += new Excel.AppEvents_SheetCalculateEventHandler(Application_SheetCalculate);
-            FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
+            FilePath = Utils.GenerateFilePath(wb.Name);
             System.Diagnostics.Debug.WriteLine(FilePath);
             System.Diagnostics.Debug.WriteLine(wb.Path + "\\" + wb.Name);
 
@@ -119,7 +119,7 @@ namespace GitExcelAddIn
         {
             var wb = this.Application.ActiveWorkbook;
 
-            FilePath = $"{wb.Path}\\sheetGit-{wb.Name.Split('.')[0]}";
+            FilePath = Utils.GenerateFilePath(wb.Name);
             if (!string.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath))
             {
                 Directory.CreateDirectory(FilePath);
@@ -136,11 +136,11 @@ namespace GitExcelAddIn
                 }
                 if (!string.IsNullOrEmpty(url))
                 {
-
+                    Repo.CreateBranch(Info["name"].ToString());
                     Remote remote = Repo.Network.Remotes.Add("origin", url);
                     Repo.Branches.Update(Repo.Head,
                         b => b.Remote = remote.Name,
-                        b => b.UpstreamBranch = "refs/heads/"+Info["name"].ToString());
+                        b => b.UpstreamBranch = Repo.Head.CanonicalName);
 
                 }
                 System.Diagnostics.Debug.WriteLine("Branches: "+Repo.Head.CanonicalName);

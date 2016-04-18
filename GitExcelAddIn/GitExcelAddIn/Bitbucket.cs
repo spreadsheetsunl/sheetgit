@@ -135,5 +135,11 @@ namespace GitExcelAddIn
             return System.Text.Encoding.ASCII.GetString(bytes);
         }
 
+        public static string GetGitLog()
+        {
+
+            return "";
+        }
+
     }
 }

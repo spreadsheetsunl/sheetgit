@@ -59,6 +59,8 @@ namespace GitExcelAddIn
             t.Start();
         }
 
+   
+
         private void insertColumn()
         {
             VirtualMouse.MoveMouse(309, 388, 20);
@@ -153,6 +155,11 @@ namespace GitExcelAddIn
             VirtualMouse.ClickLeftMouseButton();
 
 
+        }
+
+        public string GetGitLog()
+        {
+            return "holymoly";
         }
     }
 
