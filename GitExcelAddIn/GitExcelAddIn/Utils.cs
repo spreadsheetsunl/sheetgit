@@ -31,14 +31,11 @@ namespace GitExcelAddIn
             rng.Value2 = value;
         }
 
-        protected internal void initGraph()
+        protected internal static string GenerateFilePath(string fileName = null)
         {
-            Branch master = new Branch(null, "master");
-        }
-
-        protected internal static string GenerateFilePath(string fileName)
-        {
-            return Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sheetGit"), $"{fileName.Split('.')[0]}");
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sheetGit");
+            if (!string.IsNullOrEmpty(fileName)) return Path.Combine(path, $"{fileName.Split('.')[0]}");
+            return path;
         }
 
 

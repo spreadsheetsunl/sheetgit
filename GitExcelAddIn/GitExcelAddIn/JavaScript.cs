@@ -156,11 +156,6 @@ namespace GitExcelAddIn
 
 
         }
-
-        public string GetGitLog()
-        {
-            return "holymoly";
-        }
     }
 
 }

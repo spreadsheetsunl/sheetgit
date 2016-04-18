@@ -14,8 +14,6 @@ using Gma.System.MouseKeyHook;
 using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SharpBucket.Authentication;
-using SharpBucket.V1;
 using Range = Microsoft.Office.Interop.Excel.Range;
 
 namespace GitExcelAddIn
@@ -25,8 +23,6 @@ namespace GitExcelAddIn
 
         private int _previousValue = 5;
         private IKeyboardMouseEvents _m_GlobalHook;
-        private OAuthentication3Legged _authenticator;
-        private SharpBucketV1 _sharpBucket;
 
         public TaskPane()
         {
@@ -256,7 +252,7 @@ namespace GitExcelAddIn
             ThisAddIn.Info["username"] = UsernameTextTab2.Text;
             ThisAddIn.Info["password"] = PasswordTextTab2.Text;
             string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
-            File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
+            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
         }
 
         private void GitInfoTab2Button_Click(object sender, EventArgs e)
@@ -264,7 +260,14 @@ namespace GitExcelAddIn
             ThisAddIn.Info["name"] = GitNameTextTab2.Text;
             ThisAddIn.Info["email"] = GitEmailTextTab2.Text;
             string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
-            File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
+            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
+        }
+
+        public void UpdateGitGraph(string json)
+        {
+            object[] o = new object[1];
+            o[0] = json;
+            webBrowser1.Document.InvokeScript("refreshLog", o);
         }
 
 

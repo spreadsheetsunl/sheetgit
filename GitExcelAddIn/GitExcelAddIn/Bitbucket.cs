@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LibGit2Sharp;
+using Microsoft.Office.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
-using SharpBucket.V2.Pocos;
 
 namespace GitExcelAddIn
 {
     class Bitbucket
     {
         private string authCode;
+        private static Commit lastCommit;
 
         public Bitbucket()
         {
@@ -47,7 +50,7 @@ namespace GitExcelAddIn
                 var content = JObject.Parse(response.Content);
                 ThisAddIn.Info["access_token"] = content["access_token"];
                 string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
-                File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
+                File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
 
                 return "";
             }
@@ -69,7 +72,7 @@ namespace GitExcelAddIn
             ThisAddIn.Info["access_token"] =  content["access_token"];
             ThisAddIn.Info["refresh_token"] = content["refresh_token"];
             string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
-            File.WriteAllText($"{ThisAddIn.CodeLocation}/Info.json", json);
+            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
         }
 
         public void GetRepositories()
@@ -137,8 +140,35 @@ namespace GitExcelAddIn
 
         public static string GetGitLog()
         {
+            var RFC2822Format = "ddd dd MMM HH:mm:ss yyyy K";
 
-            return "";
+            JArray allcommits = new JArray();
+
+            ICommitLog commits;
+
+            if (lastCommit != null)
+            {
+                var filter = new CommitFilter {IncludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Time};
+                commits = ThisAddIn.Repo.Commits.QueryBy(filter);
+            }
+            else
+            {
+                commits = ThisAddIn.Repo.Commits;
+            }
+
+            foreach (Commit c in commits)
+            {
+                dynamic jsonObject = new JObject();
+                jsonObject.id = c.Id.ToString();
+                jsonObject.author = c.Author.Name;
+                jsonObject.email = c.Author.Email;
+                jsonObject.date = c.Author.When.ToString(RFC2822Format, CultureInfo.InvariantCulture);
+                jsonObject.message = c.Message;
+                //jsonObject.notes = new JArray(c.Notes.GetEnumerator());
+                lastCommit = c;
+                allcommits.Add(jsonObject);
+            }
+            return JsonConvert.SerializeObject(allcommits, Formatting.Indented);
         }
 
     }
