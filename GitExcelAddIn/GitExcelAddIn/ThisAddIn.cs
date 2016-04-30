@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Gma.System.MouseKeyHook;
+using LibGit2Sharp;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
@@ -13,6 +16,9 @@ namespace GitExcelAddIn
 {
     public partial class ThisAddIn
     {
+        public Repository Repo;
+        public string FilePath;
+
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
@@ -38,12 +44,33 @@ namespace GitExcelAddIn
             System.Diagnostics.Debug.WriteLine("Workbook Opened or Created");
             this.Application.SheetChange += new Excel.AppEvents_SheetChangeEventHandler(Application_SheetChange);
             this.Application.SheetCalculate += new Excel.AppEvents_SheetCalculateEventHandler(Application_SheetCalculate);
+            FilePath = $"{wb.Path}\\{wb.Name.Split('.')[0]}";
+            System.Diagnostics.Debug.WriteLine(FilePath);
+            System.Diagnostics.Debug.WriteLine(wb.Path+"\\"+wb.Name);
+
         }
 
         void Application_SheetChange(object sh, Excel.Range target)
         {
             System.Diagnostics.Debug.WriteLine("Worksheet Changed");
             Excel.Worksheet sheet = (Excel.Worksheet)sh;
+            var wb = this.Application.ActiveWorkbook;
+            if (!string.IsNullOrEmpty(wb.Path))
+            {
+                this.Application.ActiveWorkbook.Save();
+                InitRepo();
+                wb.SaveCopyAs(FilePath+"\\"+wb.Name);
+                RepositoryStatus status = Repo.RetrieveStatus();
+
+                if (status.IsDirty)
+                {
+                    Signature author = new Signature("James", "@test.com", DateTime.Now);
+                    Signature committer = author;
+                    Repo.Stage("*");
+                    Repo.Commit("message",author,committer);
+                }
+            }
+
             /*Globals.ThisAddIn.Application.ActiveWorkbook.SaveAs();*/
 
 
@@ -57,6 +84,19 @@ namespace GitExcelAddIn
         void Application_SheetCalculate(object sh)
         {
             System.Diagnostics.Debug.WriteLine("Worksheet Recalculated");
+        }
+
+        void InitRepo()
+        {
+            var wb = this.Application.ActiveWorkbook;
+
+            if (!string.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath))
+            {
+                Directory.CreateDirectory(FilePath);
+                Thread.Sleep(2500);
+                Repository.Init(FilePath);
+                Repo = new Repository(FilePath);
+            }
         }
 
         private int getExcelColumnNumber(string colAdress)
