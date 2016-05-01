@@ -217,22 +217,7 @@ namespace GitExcelAddIn
 
         private void bitbucketButton_Click(object sender, EventArgs e)
         {
-            var uri = Bitbucket.StartAuthentication();
-            if (uri != "")
-            {
-                //Process.Start(uri);
-                BrowserForm bform = new BrowserForm(uri, this);
-                bform.Show();
-                //bitbucketPinText.Visible = true;
-                //bitbucketButton.Visible = false;
-                //bitbucketSubmitButton.Visible = true;
-            }
-            else
-            {
-                bitbucketButton.Text = "Log out";
-            }
-            
-            
+            login();
         }
 
         protected internal void readyForPin(string code)
@@ -268,6 +253,35 @@ namespace GitExcelAddIn
             object[] o = new object[1];
             o[0] = json;
             webBrowser1.Document.InvokeScript("refreshLog", o);
+        }
+
+        public void UpdateInfoLabel(string text)
+        {
+            infoLabel.Text = text;
+        }
+
+        public void login()
+        {
+            var uri = Bitbucket.StartAuthentication();
+            if (uri != "")
+            {
+                //Process.Start(uri);
+                BrowserForm bform = new BrowserForm(uri, this);
+                bform.Show();
+                //bitbucketPinText.Visible = true;
+                //bitbucketButton.Visible = false;
+                //bitbucketSubmitButton.Visible = true;
+            }
+            else
+            {
+                bitbucketButton.Text = "Log out";
+            }
+        }
+
+        public void logout()
+        {
+            Bitbucket.Logout();
+            bitbucketButton.Text = "Grant permission";
         }
 
 

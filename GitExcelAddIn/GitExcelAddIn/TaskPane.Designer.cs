@@ -35,6 +35,12 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.GitInfoTab2Button = new System.Windows.Forms.Button();
+            this.GitEmailTextTab2 = new System.Windows.Forms.TextBox();
+            this.GitNameTextTab2 = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.UserPassTab2Submit = new System.Windows.Forms.Button();
             this.PasswordTextTab2 = new System.Windows.Forms.TextBox();
             this.UsernameTextTab2 = new System.Windows.Forms.TextBox();
@@ -43,12 +49,7 @@
             this.backLabelTab2 = new System.Windows.Forms.LinkLabel();
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.GitNameTextTab2 = new System.Windows.Forms.TextBox();
-            this.GitEmailTextTab2 = new System.Windows.Forms.TextBox();
-            this.GitInfoTab2Button = new System.Windows.Forms.Button();
+            this.infoLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -67,7 +68,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 16);
+            this.label3.Location = new System.Drawing.Point(44, 16);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(98, 13);
             this.label3.TabIndex = 7;
@@ -78,11 +79,11 @@
             // 
             this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.webBrowser1.Location = new System.Drawing.Point(-4, 61);
+            this.webBrowser1.Location = new System.Drawing.Point(-4, 99);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.ScriptErrorsSuppressed = true;
-            this.webBrowser1.Size = new System.Drawing.Size(198, 817);
+            this.webBrowser1.Size = new System.Drawing.Size(198, 779);
             this.webBrowser1.TabIndex = 9;
             // 
             // buttonSettings
@@ -108,6 +109,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.infoLabel);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.webBrowser1);
             this.tabPage1.Controls.Add(this.buttonSettings);
@@ -143,6 +145,57 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // GitInfoTab2Button
+            // 
+            this.GitInfoTab2Button.Location = new System.Drawing.Point(51, 244);
+            this.GitInfoTab2Button.Name = "GitInfoTab2Button";
+            this.GitInfoTab2Button.Size = new System.Drawing.Size(101, 23);
+            this.GitInfoTab2Button.TabIndex = 13;
+            this.GitInfoTab2Button.Text = "Update";
+            this.GitInfoTab2Button.UseVisualStyleBackColor = true;
+            this.GitInfoTab2Button.Click += new System.EventHandler(this.GitInfoTab2Button_Click);
+            // 
+            // GitEmailTextTab2
+            // 
+            this.GitEmailTextTab2.Location = new System.Drawing.Point(71, 217);
+            this.GitEmailTextTab2.Name = "GitEmailTextTab2";
+            this.GitEmailTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.GitEmailTextTab2.TabIndex = 12;
+            // 
+            // GitNameTextTab2
+            // 
+            this.GitNameTextTab2.Location = new System.Drawing.Point(71, 190);
+            this.GitNameTextTab2.Name = "GitNameTextTab2";
+            this.GitNameTextTab2.Size = new System.Drawing.Size(113, 20);
+            this.GitNameTextTab2.TabIndex = 11;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(13, 220);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(32, 13);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Email";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 193);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(35, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Name";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 169);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(164, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "User information on your Versions";
             // 
             // UserPassTab2Submit
             // 
@@ -217,56 +270,14 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "BitBucket account";
             // 
-            // label2
+            // infoLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 169);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(164, 13);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "User information on your Versions";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(13, 193);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(35, 13);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "Name";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(13, 220);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(32, 13);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "Email";
-            // 
-            // GitNameTextTab2
-            // 
-            this.GitNameTextTab2.Location = new System.Drawing.Point(71, 190);
-            this.GitNameTextTab2.Name = "GitNameTextTab2";
-            this.GitNameTextTab2.Size = new System.Drawing.Size(113, 20);
-            this.GitNameTextTab2.TabIndex = 11;
-            // 
-            // GitEmailTextTab2
-            // 
-            this.GitEmailTextTab2.Location = new System.Drawing.Point(71, 217);
-            this.GitEmailTextTab2.Name = "GitEmailTextTab2";
-            this.GitEmailTextTab2.Size = new System.Drawing.Size(113, 20);
-            this.GitEmailTextTab2.TabIndex = 12;
-            // 
-            // GitInfoTab2Button
-            // 
-            this.GitInfoTab2Button.Location = new System.Drawing.Point(51, 244);
-            this.GitInfoTab2Button.Name = "GitInfoTab2Button";
-            this.GitInfoTab2Button.Size = new System.Drawing.Size(101, 23);
-            this.GitInfoTab2Button.TabIndex = 13;
-            this.GitInfoTab2Button.Text = "Update";
-            this.GitInfoTab2Button.UseVisualStyleBackColor = true;
-            this.GitInfoTab2Button.Click += new System.EventHandler(this.GitInfoTab2Button_Click);
+            this.infoLabel.Location = new System.Drawing.Point(9, 67);
+            this.infoLabel.Name = "infoLabel";
+            this.infoLabel.Size = new System.Drawing.Size(177, 39);
+            this.infoLabel.TabIndex = 11;
+            this.infoLabel.Text = "Welcome to SheetGit";
+            this.infoLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // TaskPane
             // 
@@ -308,5 +319,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label infoLabel;
     }
 }

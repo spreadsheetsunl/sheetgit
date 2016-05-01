@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -35,6 +36,7 @@ namespace GitExcelAddIn
                 var request = new RestRequest(Method.POST);
                 request.AddQueryParameter("client_id", ThisAddIn.Info["consumerKey"].ToString());
                 request.AddQueryParameter("response_type", "code");
+                ThisAddIn.OnlineFunctionsEnabled = true;
                 return client.BuildUri(request).ToString();
             }
             else
@@ -54,7 +56,7 @@ namespace GitExcelAddIn
 
                 return "";
             }
-            
+
         }
 
         public static void AuthenticateWithPin(string pin)
@@ -69,7 +71,7 @@ namespace GitExcelAddIn
             IRestResponse response = client.Execute(request);
             var content = JObject.Parse(response.Content);
             System.Diagnostics.Debug.WriteLine($"access:{content["access_token"]}^^refresh:{content["refresh_token"]}");
-            ThisAddIn.Info["access_token"] =  content["access_token"];
+            ThisAddIn.Info["access_token"] = content["access_token"];
             ThisAddIn.Info["refresh_token"] = content["refresh_token"];
             string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
             File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
@@ -77,7 +79,7 @@ namespace GitExcelAddIn
 
         public void GetRepositories()
         {
-            
+
         }
 
         private static Tuple<RestClient, RestRequest> PrepareRequest()
@@ -88,7 +90,7 @@ namespace GitExcelAddIn
             var request = new RestRequest();
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddHeader("Authorization", $"Bearer {ThisAddIn.Info["access_token"]}");
-            return new Tuple<RestClient, RestRequest>(client,request);
+            return new Tuple<RestClient, RestRequest>(client, request);
         }
 
         public static string RepoExists(string name)
@@ -96,15 +98,14 @@ namespace GitExcelAddIn
             Tuple<RestClient, RestRequest> t = PrepareRequest();
             t.Item2.Resource = "{name}";
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
-            IRestResponse response = t.Item1.Execute(t.Item2);
-            var content = JObject.Parse(response.Content);
+            var content = ExecuteRequest(t);
             var repoExists = "";
             foreach (JObject value in content["values"].Children<JObject>())
             {
                 if (value["name"].ToString() == name + "-SheetGit")
                 {
                     repoExists = value["links"]["clone"][0]["href"].ToString();
-                }  
+                }
             }
             return repoExists;
         }
@@ -116,9 +117,8 @@ namespace GitExcelAddIn
             t.Item2.Resource = "{name}/{slug}";
             t.Item2.AddParameter("is_private", "true");
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
-            t.Item2.AddUrlSegment("slug", GenerateSlug("SheetGit "+name));
-            IRestResponse response = t.Item1.Execute(t.Item2);
-            var content = JObject.Parse(response.Content);
+            t.Item2.AddUrlSegment("slug", GenerateSlug("SheetGit " + name));
+            var content = ExecuteRequest(t);
             return content["links"]["clone"][0]["href"].ToString();
         }
 
@@ -128,7 +128,7 @@ namespace GitExcelAddIn
             str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
             str = Regex.Replace(str, @"\s+", " ").Trim();
             str = str.Substring(0, str.Length <= 45 ? str.Length : 45).Trim();
-            str = Regex.Replace(str, @"\s", "-");  
+            str = Regex.Replace(str, @"\s", "-");
             return str;
         }
 
@@ -136,6 +136,34 @@ namespace GitExcelAddIn
         {
             byte[] bytes = System.Text.Encoding.GetEncoding("Cyrillic").GetBytes(txt);
             return System.Text.Encoding.ASCII.GetString(bytes);
+        }
+
+        private static JObject ExecuteRequest(Tuple<RestClient, RestRequest> t)
+        {
+            for (var i = 0; i <= 1; i++)
+            {
+                IRestResponse response = t.Item1.Execute(t.Item2);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return JObject.Parse(response.Content);
+                }
+                else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if(i == 1) ThisAddIn.sheetGitPane.UpdateInfoLabel("Unauthorized. Please grant permission once more.");
+                    if (ThisAddIn.OnlineFunctionsEnabled) Bitbucket.StartAuthentication();
+                    else ThisAddIn.sheetGitPane.UpdateInfoLabel("Please grant permission in Settings if you wish to enable the online features.");
+                }
+            }
+            return null;
+        }
+
+        public static void Logout()
+        {
+            ThisAddIn.Info.Remove("access_token");
+            ThisAddIn.Info.Remove("refresh_token");
+            ThisAddIn.OnlineFunctionsEnabled = false;
+            string json = JsonConvert.SerializeObject(ThisAddIn.Info, Formatting.Indented);
+            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
         }
 
         public static string GetGitLog()
@@ -148,7 +176,7 @@ namespace GitExcelAddIn
 
             if (lastCommit != null)
             {
-                var filter = new CommitFilter {IncludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Time};
+                var filter = new CommitFilter { IncludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Time };
                 commits = ThisAddIn.Repo.Commits.QueryBy(filter);
             }
             else

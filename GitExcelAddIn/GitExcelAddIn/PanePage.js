@@ -118,7 +118,7 @@ function comTouch(commit) {
 }
 
 function refreshLog(json) {
-
+    console.log(json);
     parsed = JSON.parse(json);
 
     parsed.forEach(function(entry) {

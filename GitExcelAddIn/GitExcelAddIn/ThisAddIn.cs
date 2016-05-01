@@ -23,7 +23,8 @@ namespace GitExcelAddIn
         public static string FilePath;
         public static JObject Info;
         public static string SheetGitPath;
-        private TaskPane sheetGitPane;
+        public static bool OnlineFunctionsEnabled;
+        public static TaskPane sheetGitPane;
 
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
@@ -57,6 +58,7 @@ namespace GitExcelAddIn
             FilePath = Utils.GenerateFilePath(wb.Name);
             System.Diagnostics.Debug.WriteLine(FilePath);
             System.Diagnostics.Debug.WriteLine(wb.Path + "\\" + wb.Name);
+            OnlineFunctionsEnabled = Info["refresh_token"] != null;
 
         }
 
@@ -74,32 +76,48 @@ namespace GitExcelAddIn
 
                 if (status.IsDirty)
                 {
-                    Signature author = new Signature(Info["name"].ToString(), Info["email"].ToString(), DateTime.Now);
-                    Signature committer = author;
-                    Repo.Stage(wb.Name);
-                    var commit = Repo.Commit("message"+Repo.Commits.Count(), author, committer);
-                    /*Repo.Notes.Add(commit.Id, "One", commit.Author, commit.Committer, "");
-                    Repo.Notes.Add(commit.Id, "Two", commit.Author, commit.Committer, "");*/
-                    sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog());
-                    if (Repo.Commits.Count() == 1) Repo.CreateBranch(Info["name"].ToString());
-                    if (Repo.Network.Remotes.Any())
+                    if (Info["name"] == null || Info["email"] == null)
                     {
-                        LibGit2Sharp.PushOptions options = new LibGit2Sharp.PushOptions();
-                        options.CredentialsProvider = new CredentialsHandler(
-                            (url, usernameFromUrl, types) =>
-                                new UsernamePasswordCredentials()
-                                {
-                                    Username = Info["username"].ToString(),
-                                    Password = Info["password"].ToString()
-                                });
-                        Repo.Network.Push(Repo.Head, options);
+                        sheetGitPane.UpdateInfoLabel("Please fill in User Information in Settings");
                     }
-                    else if (Info["refreshToken"] != null)
+                    else
                     {
-                        //check if remote repos exist
-                        //if not, create
-                        //create push options
+                        Signature author = new Signature(Info["name"].ToString(), Info["email"].ToString(), DateTime.Now);
+                        Signature committer = author;
+                        Repo.Stage(wb.Name);
+                        var commit = Repo.Commit("message" + Repo.Commits.Count(), author, committer);
+                        /*Repo.Notes.Add(commit.Id, "One", commit.Author, commit.Committer, "");
+                        Repo.Notes.Add(commit.Id, "Two", commit.Author, commit.Committer, "");*/
+                        sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog());
+                        if (Repo.Commits.Count() == 1) Repo.CreateBranch(Info["name"].ToString());
+                        if (Repo.Network.Remotes.Any())
+                        {
+                            LibGit2Sharp.PushOptions options = new LibGit2Sharp.PushOptions();
+                            options.CredentialsProvider = new CredentialsHandler(
+                                (url, usernameFromUrl, types) =>
+                                    new UsernamePasswordCredentials()
+                                    {
+                                        Username = Info["username"].ToString(),
+                                        Password = Info["password"].ToString()
+                                    });
+                            try
+                            {
+                                Repo.Network.Push(Repo.Head, options);
+                            }
+                            catch(Exception e)
+                            {
+                                sheetGitPane.UpdateInfoLabel("Cannot push version online. Please confirm your Bitbucket data in Settings.");
+                            }
+                            
+                        }
+                        else if (Info["refreshToken"] != null)
+                        {
+                            //check if remote repos exist
+                            //if not, create
+                            //create push options
+                        }
                     }
+                    
                 }
             }
 
@@ -131,21 +149,12 @@ namespace GitExcelAddIn
                 Repo = new Repository(FilePath);
                 //Check if remote exists
                 //Repo.CreateBranch("master");
-                var url = Bitbucket.RepoExists(wb.Name);
-                if (string.IsNullOrEmpty(url))
-                {
-                    url = Bitbucket.CreateRepo(wb.Name);
-
-                }
-                if (!string.IsNullOrEmpty(url))
-                {
-                    Remote remote = Repo.Network.Remotes.Add("origin", url);
-                    Repo.Branches.Update(Repo.Head,
-                        b => b.Remote = remote.Name,
-                        b => b.UpstreamBranch = Repo.Head.CanonicalName);
-
-                }
-                System.Diagnostics.Debug.WriteLine("Branches: "+Repo.Head.CanonicalName);
+                var url = Bitbucket.CreateRepo(wb.Name);
+                Remote remote = Repo.Network.Remotes.Add("origin", url);
+                Repo.Branches.Update(Repo.Head,
+                    b => b.Remote = remote.Name,
+                    b => b.UpstreamBranch = Repo.Head.CanonicalName);
+                System.Diagnostics.Debug.WriteLine("Branches: " + Repo.Head.CanonicalName);
 
             }
             else
