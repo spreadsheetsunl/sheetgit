@@ -172,17 +172,18 @@ namespace GitExcelAddIn
 
             JArray allcommits = new JArray();
 
-            ICommitLog commits;
+            CommitFilter filter;
 
             if (lastCommit != null)
             {
-                var filter = new CommitFilter { IncludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Time };
-                commits = ThisAddIn.Repo.Commits.QueryBy(filter);
+                filter = new CommitFilter { ExcludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time };
             }
             else
             {
-                commits = ThisAddIn.Repo.Commits;
+                filter = new CommitFilter {SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time };
             }
+
+            var commits = ThisAddIn.Repo.Commits.QueryBy(filter);
 
             foreach (Commit c in commits)
             {
@@ -192,12 +193,13 @@ namespace GitExcelAddIn
                 jsonObject.email = c.Author.Email;
                 jsonObject.date = c.Author.When.ToString(RFC2822Format, CultureInfo.InvariantCulture);
                 jsonObject.message = c.Message;
-                //jsonObject.notes = new JArray(c.Notes.GetEnumerator());
+                jsonObject.notes = c.Notes.FirstOrDefault().Message;
                 lastCommit = c;
                 allcommits.Add(jsonObject);
             }
-            return JsonConvert.SerializeObject(allcommits, Formatting.Indented);
+            string js = JsonConvert.SerializeObject(allcommits, Formatting.Indented);
+            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Log.json", js);
+            return js;
         }
-
     }
 }

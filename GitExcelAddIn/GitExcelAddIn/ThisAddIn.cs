@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,61 +14,66 @@ using Microsoft.Office.Tools;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitExcelAddIn
 {
     public partial class ThisAddIn
     {
+        public static JObject Tree;
         public static Repository Repo;
         public static string FilePath;
         public static JObject Info;
         public static string SheetGitPath;
         public static bool OnlineFunctionsEnabled;
         public static TaskPane sheetGitPane;
+        public static Excel.Application ExcelApplication;
+        private string currentHead;
 
 
-        private void ThisAddIn_Startup(object sender, System.EventArgs e)
+        private void ThisAddIn_Startup(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Plugin initiated");
+            Debug.WriteLine("Plugin initiated");
             this.Application.WorkbookOpen += new Excel.AppEvents_WorkbookOpenEventHandler(Application_WorkbookStart);
             ((Excel.AppEvents_Event)this.Application).NewWorkbook += new Excel.AppEvents_NewWorkbookEventHandler(Application_WorkbookStart);
-
             SheetGitPath = Utils.GenerateFilePath();
 
             var infoText = File.ReadAllText($"{SheetGitPath}/info.json");
-
+            ExcelApplication = this.Application;
             Info = JObject.Parse(infoText);
-
             sheetGitPane = new TaskPane();
             var customPane = this.CustomTaskPanes.Add(sheetGitPane, "SheetGit");
             customPane.Visible = true;
 
         }
 
-        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+        private void ThisAddIn_Shutdown(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Plugin Shutdown");
+            Debug.WriteLine("Plugin Shutdown");
         }
 
         void Application_WorkbookStart(Excel.Workbook wb)
         {
-            System.Diagnostics.Debug.WriteLine("Workbook Opened or Created");
+            Debug.WriteLine("Workbook Opened or Created");
             this.Application.SheetChange += new Excel.AppEvents_SheetChangeEventHandler(Application_SheetChange);
             this.Application.SheetCalculate += new Excel.AppEvents_SheetCalculateEventHandler(Application_SheetCalculate);
+
+
+
             FilePath = Utils.GenerateFilePath(wb.Name);
-            System.Diagnostics.Debug.WriteLine(FilePath);
-            System.Diagnostics.Debug.WriteLine(wb.Path + "\\" + wb.Name);
+            Debug.WriteLine(FilePath);
+            Debug.WriteLine(wb.Path + "\\" + wb.Name);
             OnlineFunctionsEnabled = Info["refresh_token"] != null;
 
         }
 
         void Application_SheetChange(object sh, Excel.Range target)
         {
-            System.Diagnostics.Debug.WriteLine("Worksheet Changed");
+            Debug.WriteLine("Worksheet Changed");
             Excel.Worksheet sheet = (Excel.Worksheet)sh;
             var wb = this.Application.ActiveWorkbook;
-            if (!string.IsNullOrEmpty(wb.Path)) //ficheiro já foi salvo
+            if (!String.IsNullOrEmpty(wb.Path)) //ficheiro já foi salvo
             {
                 this.Application.ActiveWorkbook.Save();
                 InitRepo();
@@ -82,17 +88,15 @@ namespace GitExcelAddIn
                     }
                     else
                     {
-                        Signature author = new Signature(Info["name"].ToString(), Info["email"].ToString(), DateTime.Now);
-                        Signature committer = author;
-                        Repo.Stage(wb.Name);
-                        var commit = Repo.Commit("message" + Repo.Commits.Count(), author, committer);
-                        /*Repo.Notes.Add(commit.Id, "One", commit.Author, commit.Committer, "");
-                        Repo.Notes.Add(commit.Id, "Two", commit.Author, commit.Committer, "");*/
+                        
                         sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog());
-                        if (Repo.Commits.Count() == 1) Repo.CreateBranch(Info["name"].ToString());
+                        if (Repo.Commits.Count() == 1)
+                        {
+                            Repo.Checkout(Repo.CreateBranch(Info["name"].ToString()));   
+                        }
                         if (Repo.Network.Remotes.Any())
                         {
-                            LibGit2Sharp.PushOptions options = new LibGit2Sharp.PushOptions();
+                            PushOptions options = new PushOptions();
                             options.CredentialsProvider = new CredentialsHandler(
                                 (url, usernameFromUrl, types) =>
                                     new UsernamePasswordCredentials()
@@ -104,13 +108,13 @@ namespace GitExcelAddIn
                             {
                                 Repo.Network.Push(Repo.Head, options);
                             }
-                            catch(Exception e)
+                            catch(LibGit2SharpException e)
                             {
                                 sheetGitPane.UpdateInfoLabel("Cannot push version online. Please confirm your Bitbucket data in Settings.");
                             }
                             
                         }
-                        else if (Info["refreshToken"] != null)
+                        else if (OnlineFunctionsEnabled)
                         {
                             //check if remote repos exist
                             //if not, create
@@ -120,20 +124,11 @@ namespace GitExcelAddIn
                     
                 }
             }
-
-            /*Globals.ThisAddIn.Application.ActiveWorkbook.SaveAs();*/
-
-
-            /* string changedRange = target.get_Address(
-                Excel.XlReferenceStyle.xlA1);
-
-            MessageBox.Show("The value of " + sheet.Name + ":" +
-                changedRange + " was changed.");*/
         }
 
         void Application_SheetCalculate(object sh)
         {
-            System.Diagnostics.Debug.WriteLine("Worksheet Recalculated");
+            Debug.WriteLine("Worksheet Recalculated");
         }
 
         void InitRepo()
@@ -141,7 +136,7 @@ namespace GitExcelAddIn
             var wb = this.Application.ActiveWorkbook;
 
             FilePath = Utils.GenerateFilePath(wb.Name);
-            if (!string.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath)) //se foi salvo mas ainda não tem repo
+            if (!String.IsNullOrEmpty(wb.Path) && !Directory.Exists(FilePath)) //se foi salvo mas ainda não tem repo
             {
                 Directory.CreateDirectory(FilePath);
                 Thread.Sleep(2500);
@@ -149,18 +144,62 @@ namespace GitExcelAddIn
                 Repo = new Repository(FilePath);
                 //Check if remote exists
                 //Repo.CreateBranch("master");
-                var url = Bitbucket.CreateRepo(wb.Name);
-                Remote remote = Repo.Network.Remotes.Add("origin", url);
-                Repo.Branches.Update(Repo.Head,
-                    b => b.Remote = remote.Name,
-                    b => b.UpstreamBranch = Repo.Head.CanonicalName);
-                System.Diagnostics.Debug.WriteLine("Branches: " + Repo.Head.CanonicalName);
+                if(ThisAddIn.OnlineFunctionsEnabled) generateOnlineRepo();
 
             }
             else
             {
                 Repo = new Repository(FilePath);
             }
+        }
+
+        void generateOnlineRepo()
+        {
+            var url = Bitbucket.CreateRepo(this.Application.ActiveWorkbook.Name);
+            Remote remote = Repo.Network.Remotes.Add("origin", url);
+            Repo.Branches.Update(Repo.Head,
+                b => b.Remote = remote.Name,
+                b => b.UpstreamBranch = Repo.Head.CanonicalName);
+            Debug.WriteLine("Branches: " + Repo.Head.CanonicalName);
+        }
+
+        void Commit()
+        {
+            Signature author = new Signature(Info["name"].ToString(), Info["email"].ToString(), DateTime.Now);
+            Signature committer = author;
+            Repo.Stage("*");
+            var commit = Repo.Commit("message" + Repo.Commits.Count(), author, committer);
+            var id = commit.Id;
+
+            Tree[id] = new JObject();
+            Tree[id]["author"] = new JObject();
+            Tree[id]["author"]["email"] = commit.Author.Email;
+            Tree[id]["author"]["name"] = commit.Author.Name;
+            Tree[id]["branch"] = Repo.Head.FriendlyName;
+            Tree[id]["head"] = "true";
+
+            if (currentHead != null)
+            {
+                Tree[currentHead]["head"] = "false";
+            }
+            currentHead = commit.Id.Sha;
+
+            string json = JsonConvert.SerializeObject(Tree, Formatting.Indented);
+            File.WriteAllText(FilePath+@"/commits.json", json);
+        }
+
+        public static void ReloadWorkbook(string id)
+        {
+            var filter = new CommitFilter { IncludeReachableFrom = id };
+            var commit = ThisAddIn.Repo.Commits.QueryBy(filter).First();
+            var chkOptions = new CheckoutOptions();
+            chkOptions.CheckoutModifiers = CheckoutModifiers.Force;
+            ThisAddIn.Repo.Checkout(commit,chkOptions);
+            var path = ExcelApplication.ActiveWorkbook.FullName;
+            var name = ExcelApplication.ActiveWorkbook.Name;
+            ExcelApplication.ActiveWorkbook.Close(true);
+            File.Copy(FilePath+"\\"+name,path,true);
+            ExcelApplication.Workbooks.Open(path);
         }
 
         private int getExcelColumnNumber(string colAdress)
@@ -187,8 +226,8 @@ namespace GitExcelAddIn
         /// </summary>
         private void InternalStartup()
         {
-            this.Startup += new System.EventHandler(ThisAddIn_Startup);
-            this.Shutdown += new System.EventHandler(ThisAddIn_Shutdown);
+            this.Startup += new EventHandler(ThisAddIn_Startup);
+            this.Shutdown += new EventHandler(ThisAddIn_Shutdown);
         }
 
         #endregion

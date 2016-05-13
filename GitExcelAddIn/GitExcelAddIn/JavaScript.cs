@@ -14,6 +14,15 @@ namespace GitExcelAddIn
     public class JavaScript
     {
 
+        public void RestoreCommit(string id)
+        {
+            Thread t = new System.Threading.Thread(delegate ()
+            {
+                ThisAddIn.ReloadWorkbook(id);
+            });
+            t.Start();
+        }
+
         public void ExecuteMacro(string myResponse)
         {
             Thread t = new System.Threading.Thread(delegate ()

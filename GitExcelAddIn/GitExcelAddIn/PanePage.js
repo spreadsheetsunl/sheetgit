@@ -2,6 +2,34 @@
  *  CUSTOM TEMPLATES   *
  ***********************/
 //#5353ac", "#008fb5", "#f1c109"
+
+var kelly_colors = [
+    "#FFB300", // Vivid Yellow
+    "#803E75", // Strong Purple
+    "#FF6800", // Vivid Orange
+    "#A6BDD7", // Very Light Blue
+    "#C10020", // Vivid Red
+    "#CEA262", // Grayish Yellow
+    "#817066", // Medium Gray
+
+    // The following don't work well for people with defective color vision
+    "#007D34", // Vivid Green
+    "#F6768E", // Strong Purplish Pink
+    "#00538A", // Strong Blue
+    "#FF7A5C", // Strong Yellowish Pink
+    "#53377A", // Strong Violet
+    "#FF8E00", // Vivid Orange Yellow
+    "#B32851", // Strong Purplish Red
+    "#F4C800", // Vivid Greenish Yellow
+    "#7F180D", // Strong Reddish Brown
+    "#93AA00", // Vivid Yellowish Green
+    "#593315", // Deep Yellowish Brown
+    "#F13A13", // Vivid Reddish Orange
+    "#232C16", // Dark Olive Green
+]
+
+var last_kelly = 0;
+
 var myTemplateConfig = {
     colors: ["#676767", "#D43A3A", "#3A62D4"],
     branch: {
@@ -28,6 +56,8 @@ var myTemplateConfig = {
 };
 var myTemplate = new GitGraph.Template(myTemplateConfig);
 
+var branches = new Object();
+
 /***********************
  *    INITIALIZATION   *
  ***********************/
@@ -36,35 +66,16 @@ var config = {
     template: "metro"       // could be: "blackarrow" or "metro" or `myTemplate` (custom Template object)
     //, mode: "compact"     // special compact mode : hide messages & compact graph
 };
-var gitGraph = new GitGraph({
+
+branches["master"] = [
+    new GitGraph({
     //mode: "compact",
     template: "metro"
-});
+}),null];
 
 var selectedCommit;
-var coordinateX = 999;
-var coordinateY = 999;
 
-gitGraph.template = myTemplate;
-
-/***********************
- * BRANCHS AND COMMITS *
- ***********************/
-
-// Create branch named "master"
-var master = gitGraph.branch("master");
-gitGraph.commit({
-    message: "<b>Initial commit</b><br>",
-    onClick: function(commit) { comTouch(commit); },
-    changes: "Initial",
-    dotColor: "#D43A3A"
-});
-
-var com = gitGraph.commits[gitGraph.commits.length - 1];
-coordinateX = com.x;
-coordinateX = com.y;
-comTouch(com);
-
+branches["master"][0].template = myTemplate;
 
 /***********************
  *       EVENTS        *
@@ -120,15 +131,25 @@ function comTouch(commit) {
 function refreshLog(json) {
     console.log(json);
     parsed = JSON.parse(json);
+    var master = branches["master"][0];
 
     parsed.forEach(function(entry) {
         //<b>Commit message</b><br><i>Cell C28 = 15/09/2001</i>"
+        if (branches[entry.author] == null) {
+            branches[entry.author] = [master.branch(entry.author), last_kelly++];
+        }
+
         gitGraph.commit({
             message: "<b>"+entry.message+"</b><br><i>"+entry.author+" <"+entry.email+"><br>"+entry.date+"</i>",
             onClick: function (commit) { comTouch(commit); },
             changes: "Initial",
             dotColor: "#D43A3A"
         });
+
+        if (selectedCommit == null) {
+            var com = master.commits[master.commits.length-1];
+            comTouch(com);
+        }
         selectedCommit.parent.render();
     });
     
