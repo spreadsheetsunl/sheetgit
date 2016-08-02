@@ -179,6 +179,7 @@
       <DependentUpon>BrowserForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ExcelTasks.cs" />
+    <Compile Include="exceptions\NoChangesExistException.cs" />
     <Compile Include="JavaScript.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -234,12 +235,14 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="css\gitgraph - Copy.css" />
     <Content Include="css\gitgraph.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="css\perfect-scrollbar.min.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="js\gitgraph - Copy.js" />
     <Content Include="js\gitgraph.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

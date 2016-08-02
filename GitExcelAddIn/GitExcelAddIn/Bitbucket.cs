@@ -19,7 +19,7 @@ namespace GitExcelAddIn
     class Bitbucket
     {
         private string authCode;
-        private static Commit lastCommit;
+        private static int lastCommit = 0;
 
         public Bitbucket()
         {
@@ -99,6 +99,7 @@ namespace GitExcelAddIn
             t.Item2.Resource = "{name}";
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
             var content = ExecuteRequest(t);
+            if (content == null) return null;
             var repoExists = "";
             foreach (JObject value in content["values"].Children<JObject>())
             {
@@ -119,7 +120,7 @@ namespace GitExcelAddIn
             t.Item2.AddUrlSegment("name", "repositories/Raikon");
             t.Item2.AddUrlSegment("slug", GenerateSlug("SheetGit " + name));
             var content = ExecuteRequest(t);
-            return content["links"]["clone"][0]["href"].ToString();
+            return content?["links"]["clone"][0]["href"].ToString();
         }
 
         private static string GenerateSlug(string phrase)
@@ -166,39 +167,61 @@ namespace GitExcelAddIn
             File.WriteAllText($"{ThisAddIn.SheetGitPath}/Info.json", json);
         }
 
-        public static string GetGitLog()
+        public static string GetGitLog(bool full = false)
         {
+
             var RFC2822Format = "ddd dd MMM HH:mm:ss yyyy K";
 
-            JArray allcommits = new JArray();
+            var masterObject = new JObject();
+            var allcommits = new JArray();
 
-            CommitFilter filter;
-
-            if (lastCommit != null)
+            if (full)
             {
-                filter = new CommitFilter { ExcludeReachableFrom = lastCommit, SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time };
-            }
-            else
-            {
-                filter = new CommitFilter {SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time };
+                lastCommit = 0;
+                allcommits.Add(new JProperty("reset","all"));
             }
 
-            var commits = ThisAddIn.Repo.Commits.QueryBy(filter);
 
-            foreach (Commit c in commits)
+            var i = 0;
+            Queue<JToken> toIterate = new Queue<JToken>();
+            //1 0 -> 2 1
+
+            JProperty latest = null;
+
+            foreach (JProperty c in ThisAddIn.Tree.Children().OrderBy(r => DateTimeOffset.Parse(r.First["timestamp"].ToString())))
             {
-                dynamic jsonObject = new JObject();
-                jsonObject.id = c.Id.ToString();
-                jsonObject.author = c.Author.Name;
-                jsonObject.email = c.Author.Email;
-                jsonObject.date = c.Author.When.ToString(RFC2822Format, CultureInfo.InvariantCulture);
-                jsonObject.message = c.Message;
-                jsonObject.notes = c.Notes.FirstOrDefault().Message;
-                lastCommit = c;
-                allcommits.Add(jsonObject);
+                JToken result = c;
+
+                if ( c.Name == "latest")
+                {
+                    Branch branch = ThisAddIn.Repo.Branches.Select(p => p).First(p => p.FriendlyName == (string) c.First["branch"]);
+                    var key = branch.Tip.Sha;
+                    var prop = new JProperty("sha",key);
+                    latest = new JProperty(key,c.First);
+                    i++;
+                    continue;
+                    /*result.First.Remove();
+                    result = result.First;*/
+                }
+                if (i >= lastCommit)
+                {
+                    toIterate.Enqueue(result);
+                }
+                i++;
             }
+            if(latest != null) toIterate.Enqueue(latest);
+            lastCommit += i - lastCommit;
+
+            //allcommits.Add(new JObject(ThisAddIn.Tree[""]));
+
+            //allcommits.Add(ThisAddIn.Tree.Children().FirstOrDefault());
+            foreach (var prop in toIterate)
+            {
+                allcommits.Add(new JObject(prop));
+                //lastCommit++;
+            }
+            masterObject.Add(new JProperty("values",allcommits));
             string js = JsonConvert.SerializeObject(allcommits, Formatting.Indented);
-            File.WriteAllText($"{ThisAddIn.SheetGitPath}/Log.json", js);
             return js;
         }
     }

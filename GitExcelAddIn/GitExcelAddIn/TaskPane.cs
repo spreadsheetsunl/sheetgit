@@ -22,10 +22,14 @@ namespace GitExcelAddIn
     {
 
         private int _previousValue = 5;
+        private JEnumerable<JToken> _currentChanges;
+        private Range _lastChange;
         private IKeyboardMouseEvents _m_GlobalHook;
+        delegate void SetChangesCallback(JObject changes);
 
         public TaskPane()
         {
+            _currentChanges = new JEnumerable<JToken>();
             InitializeComponent();
             string appPath = System.IO.Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
@@ -34,6 +38,7 @@ namespace GitExcelAddIn
             Uri uri = new Uri(appPath + @"\PanePage.html");
             webBrowser1.Url = uri;
             webBrowser1.Update();
+            metricsCombobox.SelectedIndex = 0;
             //JS calls c#
             webBrowser1.ObjectForScripting = new JavaScript();
             object[] o = new object[1];
@@ -42,12 +47,15 @@ namespace GitExcelAddIn
 
             webBrowser1.DocumentCompleted += webBrowser1_DocumentCompleted;
 
+            changesTrackbar.ValueChanged += changesTrackbar_ValueChanged;
+
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
 
             Subscribe();
         }
+
 
         private void TaskPane_Load(object sender, EventArgs e)
         {
@@ -251,6 +259,7 @@ namespace GitExcelAddIn
         public void UpdateGitGraph(string json)
         {
             object[] o = new object[1];
+            Task.Delay(0);
             o[0] = json;
             webBrowser1.Document.InvokeScript("refreshLog", o);
         }
@@ -278,10 +287,57 @@ namespace GitExcelAddIn
             }
         }
 
+        public void MovetoDiffTab(JObject changes)
+        {
+            if (changesTrackbar.InvokeRequired)
+            {
+                SetChangesCallback d = MovetoDiffTab;
+                Invoke(d, changes);
+            }
+            else
+            {
+                JProperty first = (JProperty)changes.First;
+                changesTrackbar.Maximum = changes.Count-1;
+                changesTrackbar.Value = changesTrackbar.Maximum;
+                changeInfoText.Text = $"Cell Range: {first.Name}\n\nValue: {first.Value}";
+                /*Worksheet sheet = ThisAddIn.ExcelApplication.ActiveSheet;
+                sheet.(first.Name);*/
+                var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
+                _lastChange = sheet.Range[first.Name, first.Name];
+                _lastChange.Interior.Color = XlRgbColor.rgbYellowGreen;
+                _lastChange.Borders.Color = XlRgbColor.rgbGray;
+                _currentChanges = changes.Children();
+                tabControl1.SelectTab("tabPage3");
+            }
+        }
+
+        private void changesTrackbar_ValueChanged(object sender, EventArgs e)
+        {
+            _lastChange.Interior.Color = XlRgbColor.rgbWhite;
+            JProperty c = (JProperty) _currentChanges.Skip(changesTrackbar.Maximum - changesTrackbar.Value).Take(1).Single();
+            changeInfoText.Text = $"Cell Range: {c.Name}\n\nValue: {c.Value}";
+            var sheet = (Worksheet) ThisAddIn.ExcelApplication.ActiveSheet;
+            _lastChange = sheet.Range[c.Name, c.Name];
+            _lastChange.Interior.Color = XlRgbColor.rgbYellowGreen;
+            _lastChange.Borders.Color = XlRgbColor.rgbGray;
+        }
+
         public void logout()
         {
             Bitbucket.Logout();
             bitbucketButton.Text = "Grant permission";
+        }
+
+        private void mergebutton_Click(object sender, EventArgs e)
+        {
+            ThisAddIn.Merge();
+        }
+
+        private void exitDiffTab_Click(object sender, EventArgs e)
+        {
+            _lastChange.Interior.Color = XlRgbColor.rgbWhite;
+            _lastChange.Borders.Color = XlRgbColor.rgbGray;
+            tabControl1.SelectTab("tabPage1");
         }
 
 

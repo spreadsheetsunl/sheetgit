@@ -34,6 +34,8 @@
             this.buttonSettings = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.mergebutton = new System.Windows.Forms.Button();
+            this.infoLabel = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.GitInfoTab2Button = new System.Windows.Forms.Button();
             this.GitEmailTextTab2 = new System.Windows.Forms.TextBox();
@@ -49,10 +51,17 @@
             this.backLabelTab2 = new System.Windows.Forms.LinkLabel();
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.infoLabel = new System.Windows.Forms.Label();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.changesTrackbar = new System.Windows.Forms.TrackBar();
+            this.exitDiffTab = new System.Windows.Forms.Button();
+            this.changeInfoText = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.metricsCombobox = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.changesTrackbar)).BeginInit();
             this.SuspendLayout();
             // 
             // button2
@@ -79,11 +88,11 @@
             // 
             this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.webBrowser1.Location = new System.Drawing.Point(-4, 99);
+            this.webBrowser1.Location = new System.Drawing.Point(-4, 126);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.ScriptErrorsSuppressed = true;
-            this.webBrowser1.Size = new System.Drawing.Size(198, 779);
+            this.webBrowser1.Size = new System.Drawing.Size(198, 752);
             this.webBrowser1.TabIndex = 9;
             // 
             // buttonSettings
@@ -100,6 +109,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -109,6 +119,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.mergebutton);
             this.tabPage1.Controls.Add(this.infoLabel);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.webBrowser1);
@@ -122,8 +133,29 @@
             this.tabPage1.Text = "tabPage1";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // mergebutton
+            // 
+            this.mergebutton.Location = new System.Drawing.Point(6, 58);
+            this.mergebutton.Name = "mergebutton";
+            this.mergebutton.Size = new System.Drawing.Size(75, 23);
+            this.mergebutton.TabIndex = 12;
+            this.mergebutton.Text = "Merge";
+            this.mergebutton.UseVisualStyleBackColor = true;
+            this.mergebutton.Click += new System.EventHandler(this.mergebutton_Click);
+            // 
+            // infoLabel
+            // 
+            this.infoLabel.Location = new System.Drawing.Point(9, 84);
+            this.infoLabel.Name = "infoLabel";
+            this.infoLabel.Size = new System.Drawing.Size(177, 39);
+            this.infoLabel.TabIndex = 11;
+            this.infoLabel.Text = "Welcome to SheetGit";
+            this.infoLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.metricsCombobox);
+            this.tabPage2.Controls.Add(this.label6);
             this.tabPage2.Controls.Add(this.GitInfoTab2Button);
             this.tabPage2.Controls.Add(this.GitEmailTextTab2);
             this.tabPage2.Controls.Add(this.GitNameTextTab2);
@@ -270,14 +302,67 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "BitBucket account";
             // 
-            // infoLabel
+            // tabPage3
             // 
-            this.infoLabel.Location = new System.Drawing.Point(9, 67);
-            this.infoLabel.Name = "infoLabel";
-            this.infoLabel.Size = new System.Drawing.Size(177, 39);
-            this.infoLabel.TabIndex = 11;
-            this.infoLabel.Text = "Welcome to SheetGit";
-            this.infoLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.tabPage3.Controls.Add(this.changeInfoText);
+            this.tabPage3.Controls.Add(this.exitDiffTab);
+            this.tabPage3.Controls.Add(this.changesTrackbar);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(190, 663);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "tabPage3";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // changesTrackbar
+            // 
+            this.changesTrackbar.Location = new System.Drawing.Point(0, 68);
+            this.changesTrackbar.Name = "changesTrackbar";
+            this.changesTrackbar.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.changesTrackbar.Size = new System.Drawing.Size(45, 437);
+            this.changesTrackbar.TabIndex = 0;
+            this.changesTrackbar.Value = 10;
+            // 
+            // exitDiffTab
+            // 
+            this.exitDiffTab.Location = new System.Drawing.Point(7, 17);
+            this.exitDiffTab.Name = "exitDiffTab";
+            this.exitDiffTab.Size = new System.Drawing.Size(177, 23);
+            this.exitDiffTab.TabIndex = 1;
+            this.exitDiffTab.Text = "Exit Comparison";
+            this.exitDiffTab.UseVisualStyleBackColor = true;
+            this.exitDiffTab.Click += new System.EventHandler(this.exitDiffTab_Click);
+            // 
+            // changeInfoText
+            // 
+            this.changeInfoText.Location = new System.Drawing.Point(52, 68);
+            this.changeInfoText.Name = "changeInfoText";
+            this.changeInfoText.Size = new System.Drawing.Size(132, 130);
+            this.changeInfoText.TabIndex = 2;
+            this.changeInfoText.Text = "Change Info Text";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(10, 303);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(92, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Versioning metrics";
+            // 
+            // metricsCombobox
+            // 
+            this.metricsCombobox.FormattingEnabled = true;
+            this.metricsCombobox.Items.AddRange(new object[] {
+            "Every workbook change",
+            "After 1 minute without changes",
+            "Every minute",
+            "Fully manual"});
+            this.metricsCombobox.Location = new System.Drawing.Point(10, 320);
+            this.metricsCombobox.Name = "metricsCombobox";
+            this.metricsCombobox.Size = new System.Drawing.Size(174, 21);
+            this.metricsCombobox.TabIndex = 15;
             // 
             // TaskPane
             // 
@@ -293,6 +378,9 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.changesTrackbar)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -320,5 +408,12 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label infoLabel;
+        private System.Windows.Forms.Button mergebutton;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label changeInfoText;
+        private System.Windows.Forms.Button exitDiffTab;
+        private System.Windows.Forms.TrackBar changesTrackbar;
+        private System.Windows.Forms.ComboBox metricsCombobox;
+        private System.Windows.Forms.Label label6;
     }
 }

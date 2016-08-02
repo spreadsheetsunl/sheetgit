@@ -23,6 +23,15 @@ namespace GitExcelAddIn
             t.Start();
         }
 
+        public void BeginDiff(string id)
+        {
+            Thread t = new System.Threading.Thread(delegate ()
+            {
+                ThisAddIn.Diff(id);
+            });
+            t.Start();
+        }
+
         public void ExecuteMacro(string myResponse)
         {
             Thread t = new System.Threading.Thread(delegate ()

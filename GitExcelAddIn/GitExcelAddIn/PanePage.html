@@ -6,8 +6,9 @@
     <meta charset="UTF-8">
     <title>GitGraph.js example page</title>
     <link rel="stylesheet" type="text/css" href="css/gitgraph.css"/>
-    <!--<link rel="stylesheet" type="text/css" href="css/perfect-scrollbar.min.css" />-->
+    <!--<link rel="stylesheet" type="text/css" href="css/perfect-scrollbar.min.css"/>-->
     <script src="js/gitgraph.js"></script>
+
     <script src="js/jquery-2.2.3.min.js"></script>
     <style>
         body {
@@ -26,20 +27,27 @@
             }
         }
 
-        function submitbutton() {
+        /*function submitbutton() {
             var str = window.external.LogIn($('#un').val(), $('#pw').val());
             Console.log(str);
             $("#popupLogin").popup("close");
-        }
+        }*/
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('diffButton').onclick = function () { this.value = "Normal Mode"; };
+        }, false);
 
     </script>
 </head>
 
 <body style="background-color: #E6E6E6">
-<div id="inner"><canvas id="gitGraph"></canvas>
-</div>
+    <button style="margin: auto; display: block;" id="diffButton">Diff Mode</button>
+    <div id="inner">
+        <canvas id="gitGraph"></canvas>
+    </div>
 
-   <!-- <a href="#popupLogin" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Sign in</a>
+
+    <!-- <a href="#popupLogin" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Sign in</a>
     <div data-role="popup" id="popupLogin" data-theme="a" class="ui-corner-all">
         <form>
             <div style="padding:10px 20px;">
@@ -53,7 +61,7 @@
         </form>
     </div>-->
 
-<script src="PanePage.js"></script>
+    <script src="PanePage.js"></script>
     <!--<script src="js/perfect-scrollbar.jquery.min.js"></script>-->
 </body>
 

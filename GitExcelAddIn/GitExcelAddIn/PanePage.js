@@ -1,16 +1,19 @@
-/***********************
+﻿/***********************
  *  CUSTOM TEMPLATES   *
  ***********************/
 //#5353ac", "#008fb5", "#f1c109"
 
 var kelly_colors = [
-    "#FFB300", // Vivid Yellow
+    "#817066", // Medium Gray
     "#803E75", // Strong Purple
-    "#FF6800", // Vivid Orange
-    "#A6BDD7", // Very Light Blue
     "#C10020", // Vivid Red
     "#CEA262", // Grayish Yellow
-    "#817066", // Medium Gray
+    "#FF6800", // Vivid Orange
+    "#FFB300", // Vivid Yellow
+    "#A6BDD7", // Very Light Blue
+    
+    
+    
 
     // The following don't work well for people with defective color vision
     "#007D34", // Vivid Green
@@ -29,9 +32,14 @@ var kelly_colors = [
 ]
 
 var last_kelly = 0;
+var diffMode = false;
 
 var myTemplateConfig = {
-    colors: ["#676767", "#D43A3A", "#3A62D4"],
+    arrow: {
+        size: 10,
+        offset: -3
+    },
+    colors: kelly_colors,
     branch: {
         lineWidth: 5,
         spacingX: 16
@@ -42,7 +50,7 @@ var myTemplateConfig = {
             size: 6
         },
         message: {
-            display: false,
+            display: true,
             displayAuthor: false,
             displayBranch: false,
             displayHash: false,
@@ -50,32 +58,27 @@ var myTemplateConfig = {
             color: "black"
         },
         tooltipHTMLFormatter: function (commit) {
-            return "" + commit.message;
+            return "" + commit.realMessage;
         }
     }
 };
 var myTemplate = new GitGraph.Template(myTemplateConfig);
 
 var branches = new Object();
+var commits = new Object();
 
 /***********************
  *    INITIALIZATION   *
  ***********************/
 
-var config = {
-    template: "metro"       // could be: "blackarrow" or "metro" or `myTemplate` (custom Template object)
-    //, mode: "compact"     // special compact mode : hide messages & compact graph
-};
+var gitGraph = new GitGraph();
+
+gitGraph.template = myTemplate;
 
 branches["master"] = [
-    new GitGraph({
-    //mode: "compact",
-    template: "metro"
-}),null];
+    gitGraph.branch("master"), last_kelly++];
 
 var selectedCommit;
-
-branches["master"][0].template = myTemplate;
 
 /***********************
  *       EVENTS        *
@@ -87,70 +90,132 @@ gitGraph.canvas.addEventListener("commit:mouseover", function (event) {
 
 // Attach a handler to the commit
 
-function comTouch(commit) {
-    console.log("You just clicked my commit.", commit);
-    commit.dotColor = "white";
-    commit.dotStrokeWidth = 10;
+function comTouch(commit, restore) {
+    console.log("You just clicked my commit. - " + window.diffMode, commit);
 
-    if (selectedCommit != null && commit != selectedCommit) {
-        selectedCommit.dotColor = selectedCommit.dotStrokeColor;
-        selectedCommit.dotStrokeWidth = null;
-        selectedCommit.parent.render();
+    if (window.diffMode === false) {
+        commit.dotColor = "white";
+        commit.dotStrokeWidth = 10;
 
-        if (commit.changes != null) {
-            var x = -1;
-            var y = -1;
-            var pathA = "";
-            var pathB = "";
-            var commitA = selectedCommit;
-            var commitB = commit;
-            var final;
+        if (selectedCommit != null && commit != selectedCommit) {
+            selectedCommit.dotColor = selectedCommit.dotStrokeColor;
+            selectedCommit.dotStrokeWidth = null;
+            selectedCommit.parent.render();
 
-            console.log("new" + commit.changes);
-            console.log("old" + selectedCommit.changes);
-            
-            while (commitA != commitB) {
-                if (commitA.y > commitB.y) {
-                    pathA = pathA.concat("R|"+commitA.changes+"***");
-                    commitA = commitA.parentCommit;
-                } else {
-                    pathB = pathB.concat("A|"+commitB.changes+"***");
-                    commitB = commitB.parentCommit;
+            /*if (commit.changes != null) {
+                var x = -1;
+                var y = -1;
+                var pathA = "";
+                var pathB = "";
+                var commitA = selectedCommit;
+                var commitB = commit;
+                var final;
+    
+                console.log("new" + commit.changes);
+                console.log("old" + selectedCommit.changes);
+                
+                while (commitA != commitB) {
+                    if (commitA.y > commitB.y) {
+                        pathA = pathA.concat("R|"+commitA.changes+"***");
+                        commitA = commitA.parentCommit;
+                    } else {
+                        pathB = pathB.concat("A|"+commitB.changes+"***");
+                        commitB = commitB.parentCommit;
+                    }
                 }
-            }
-            final = pathA.concat(pathB);
-            console.log(final);
-            window.external.ExecuteMacro(final);
+                final = pathA.concat(pathB);
+                console.log(final);*/
+            if (restore) window.external.RestoreCommit(commit.sha1);
         }
-    }
-    selectedCommit = commit;
+        selectedCommit = commit;
 
-    commit.parent.render();
+        commit.parent.render();
+    } else {
+        //Begin diffing
+        window.external.BeginDiff(commit.sha1);
+    }
+
+}
+
+function toggleDiff() {
+    $("#diffButton").click();
 }
 
 function refreshLog(json) {
-    console.log(json);
-    parsed = JSON.parse(json);
+    if (window.diffMode === true) {
+        this.toggleDiff();
+    }
+    var parsed = JSON.parse(json);
     var master = branches["master"][0];
+    var finalCommit;
+    var i = 1;
+    //debugger;
+    for (var pindex in parsed) {
+        var key = Object.keys(parsed[pindex])[0];
+        //if (parsed.hasOwnProperty(key)) {
+            //if(key === "head") continue;
+            if (key === "reset") {
+                gitGraph = new GitGraph();
+                last_kelly = 0;
+                gitGraph.template = myTemplate;
+                branches = new Object();
+                commits = new Object();
+                branches["master"] = [
+                    gitGraph.branch("master"), last_kelly++];
+                continue;
+            }
+            var entry = parsed[pindex][key];
+            /*if (first && commits["latest"] != null) {
+                commits["latest"].sha1 = key;
+                commits[entry["parent"]] = commits["latest"];
+                first = false;
+                continue;
+            }*/
 
-    parsed.forEach(function(entry) {
-        //<b>Commit message</b><br><i>Cell C28 = 15/09/2001</i>"
-        if (branches[entry.author] == null) {
-            branches[entry.author] = [master.branch(entry.author), last_kelly++];
-        }
+            var parent = entry["parent"];
+            //<b>Commit message</b><br><i>Cell C28 = 15/09/2001</i>"
+            if (branches[entry["branch"]] == null) {
+                branches[entry["branch"]] = [gitGraph.branch({ parentCommit: commits[entry["parent"]], name: entry["branch"]}), last_kelly];
+            }
 
-        gitGraph.commit({
-            message: "<b>"+entry.message+"</b><br><i>"+entry.author+" <"+entry.email+"><br>"+entry.date+"</i>",
-            onClick: function (commit) { comTouch(commit); },
-            changes: "Initial",
-            dotColor: "#D43A3A"
-        });
+            var br = entry["branch"];
+            var auth = entry["author"];
+            var brr = entry.branch;
 
-        if (selectedCommit == null) {
-            var com = master.commits[master.commits.length-1];
-            comTouch(com);
-        }
-        selectedCommit.parent.render();
-    });
-    
+            if (commits[key] == null) {
+                branches[entry["branch"]][0].commit({
+                    realMessage: "<b>" + entry["message"] + "</b><br><i>" + entry["branch"] + " <" + "e" + "><br>" + "d" + "</i>",
+                    message: "V" + (Object.keys(commits).length + 1),
+                    onClick: function (commit) { comTouch(commit, true); },
+                    changes: "Placeholder for changes",
+                    sha1: key,
+                    dotColor: kelly_colors[branches[entry["branch"]][1]]
+                });
+
+                commits[key] = branches[entry["branch"]][0].commits.slice(-1)[0];
+                finalCommit = commits[key];
+            }
+
+
+            i++;
+        //}
+    }
+    var com = finalCommit;
+    comTouch(com, false);
+    selectedCommit.parent.render();
 }
+
+
+
+$("button").click(function () {
+    if ($(this).text() == 'Diff Mode') {
+        $(this).html('Normal Mode');
+        $('body').css({ 'background': "#cdc3c3" });
+        diffMode = true;
+    } else {
+        $(this).html('Diff Mode');
+        $('body').css({ 'background': "#EEE" });
+        diffMode = false;
+    }
+});
+
