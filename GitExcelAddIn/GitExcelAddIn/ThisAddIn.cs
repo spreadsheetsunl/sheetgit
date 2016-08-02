@@ -381,20 +381,20 @@ namespace GitExcelAddIn
 
         public static void Merge()
         {
-            var backTree = Tree.DeepClone();
-            var numCommits = Repo.Commits.Count();
             var commitB = Repo.Head.Tip; //ToMerge
             CheckoutOptions opt = new CheckoutOptions();
             opt.CheckoutModifiers = CheckoutModifiers.None;
             Repo.Checkout(Repo.Branches["master"], opt);
-            MergeOptions m = new MergeOptions();
+            var masterCommits = "";
+            //File.ReadAllText($"{FilePath}/commits.json");
+            MergeOptions m = new MergeOptions { FileConflictStrategy = CheckoutFileConflictStrategy.Theirs };
             m.CommitOnSuccess = false;
             Repo.Merge(commitB, GenerateSignature(), m);
             bool free = Repo.Index.IsFullyMerged;
             var conflicts = Repo.Index.Conflicts;
             if (!Repo.Index.Conflicts.Any()) //Fast Forward merge
             {
-                Dictionary<string,string> iterated = new Dictionary<string,string>();
+                Dictionary<string, string> iterated = new Dictionary<string, string>();
                 foreach (var branch in Repo.Branches)
                 {
                     var commits = Repo.Commits.QueryBy(new CommitFilter { IncludeReachableFrom = branch });
@@ -408,7 +408,7 @@ namespace GitExcelAddIn
                         if (!iterated.ContainsKey(c.Sha))
                         {
                             Tree[toChange]["branch"] = branch.FriendlyName;
-                            iterated.Add(c.Sha,"");
+                            iterated.Add(c.Sha, "");
                         }
 
 
@@ -441,13 +441,62 @@ namespace GitExcelAddIn
                 sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog(true));
 
             }
-            foreach (var c in conflicts)
+            else
             {
-                var ours = c.Ours;
-                var theirs = c.Theirs;
-                var ancestor = c.Ancestor;
+                Tree = null;
+                BuildTree(masterCommits);
+                var newCommits = File.ReadAllText($"{FilePath}/commits.json"); //Their commits
+                var theirCommits = JObject.Parse(newCommits);
+
+                var theirChanges = theirCommits["latest"]["branchChanges"];
+                var ourChanges = Tree["latest"]["branchChanges"];
+
+                JObject toChange = new JObject();
+
+                foreach (JProperty change in theirChanges.Children())
+                {
+                    if (theirChanges.Children().Contains(change.Name))
+                    {
+                        foreach (JProperty whatHappened in change.Value)
+                        {
+                            var cur = ourChanges[change.Name][whatHappened.Name];
+                            if (cur != change.Value[whatHappened.Name])
+                            {
+                                toChange[change.Name][whatHappened.Name] = new JArray(change.Value[whatHappened.Name], cur);
+                            }
+                        }
+                    }
+                }
+                Excel.Worksheet ws = ThisAddIn.ExcelApplication.ActiveSheet;
+                foreach (var toCombo in toChange)
+                {
+                    Excel.Range cell = ws.Range[toCombo.Key, toCombo.Key];
+
+                    var flatList = string.Join(",", ((JArray)toCombo.Value).Cast<string>().ToArray());
+
+                    cell.Validation.Delete();
+                    cell.Validation.Add(
+                       Excel.XlDVType.xlValidateList,
+                       Excel.XlDVAlertStyle.xlValidAlertInformation,
+                       Excel.XlFormatConditionOperator.xlBetween,
+                       flatList,
+                       Type.Missing);
+
+                    cell.Validation.IgnoreBlank = true;
+                    cell.Validation.InCellDropdown = true;
+                    cell.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 217, 217, 0));
+                    /*var confs = newCommits.Split(new[] { "<<<<<<< HEAD" }, StringSplitOptions.None);
+                    foreach (var problem in confs)
+                    {
+                        var details = problem.Split(new[] { "=======" }, StringSplitOptions.None);
+
+
+                    }*/
+                    Repo.Index.Add("commits.json");
+                    Repo.Index.Add(FilePath);
+                }
             }
-            var b2 = Repo.RetrieveStatus().IsDirty;
+
             foreach (var w in Repo.RetrieveStatus().Modified)
             {
                 var g = w.FilePath;
@@ -462,17 +511,18 @@ namespace GitExcelAddIn
         {
             var filter = new CommitFilter { IncludeReachableFrom = id };
             Commit commit;
-            if (id != "latest")
-            {
-                commit = ThisAddIn.Repo.Commits.QueryBy(filter).First();
-            }
-            else
+            commit = ThisAddIn.Repo.Commits.QueryBy(filter).First();
+            /*else
             {
                 commit = ThisAddIn.Repo.Commits.Skip(1).Take(1).First(); //First é o head
-            }
+            }*/
             Branch futureBranch = ThisAddIn.Repo.Branches.FirstOrDefault(b => b.Tip.Sha == id);
             var chkOptions = new CheckoutOptions();
             chkOptions.CheckoutModifiers = CheckoutModifiers.Force;
+            while (File.Exists(FilePath + "/.git/index.lock"))
+            {
+                Task.Delay(1000);
+            }
             if (futureBranch == null) ThisAddIn.Repo.Checkout(commit, chkOptions);
             else ThisAddIn.Repo.Checkout(futureBranch, chkOptions);
             var path = ExcelApplication.ActiveWorkbook.FullName;

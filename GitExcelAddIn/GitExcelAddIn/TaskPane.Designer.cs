@@ -37,6 +37,8 @@
             this.mergebutton = new System.Windows.Forms.Button();
             this.infoLabel = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.metricsCombobox = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.GitInfoTab2Button = new System.Windows.Forms.Button();
             this.GitEmailTextTab2 = new System.Windows.Forms.TextBox();
             this.GitNameTextTab2 = new System.Windows.Forms.TextBox();
@@ -52,11 +54,9 @@
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.changesTrackbar = new System.Windows.Forms.TrackBar();
-            this.exitDiffTab = new System.Windows.Forms.Button();
             this.changeInfoText = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.metricsCombobox = new System.Windows.Forms.ComboBox();
+            this.exitDiffTab = new System.Windows.Forms.Button();
+            this.changesTrackbar = new System.Windows.Forms.TrackBar();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -68,9 +68,9 @@
             // 
             this.button2.Location = new System.Drawing.Point(6, 32);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(86, 23);
             this.button2.TabIndex = 4;
-            this.button2.Text = "Commit";
+            this.button2.Text = "Create Version";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -97,9 +97,9 @@
             // 
             // buttonSettings
             // 
-            this.buttonSettings.Location = new System.Drawing.Point(111, 32);
+            this.buttonSettings.Location = new System.Drawing.Point(98, 32);
             this.buttonSettings.Name = "buttonSettings";
-            this.buttonSettings.Size = new System.Drawing.Size(75, 23);
+            this.buttonSettings.Size = new System.Drawing.Size(88, 23);
             this.buttonSettings.TabIndex = 10;
             this.buttonSettings.Text = "Settings";
             this.buttonSettings.UseVisualStyleBackColor = true;
@@ -137,9 +137,9 @@
             // 
             this.mergebutton.Location = new System.Drawing.Point(6, 58);
             this.mergebutton.Name = "mergebutton";
-            this.mergebutton.Size = new System.Drawing.Size(75, 23);
+            this.mergebutton.Size = new System.Drawing.Size(178, 23);
             this.mergebutton.TabIndex = 12;
-            this.mergebutton.Text = "Merge";
+            this.mergebutton.Text = "Place versions in trunk";
             this.mergebutton.UseVisualStyleBackColor = true;
             this.mergebutton.Click += new System.EventHandler(this.mergebutton_Click);
             // 
@@ -177,6 +177,28 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // metricsCombobox
+            // 
+            this.metricsCombobox.FormattingEnabled = true;
+            this.metricsCombobox.Items.AddRange(new object[] {
+            "Every workbook change",
+            "After 1 minute without changes",
+            "Every minute",
+            "Fully manual"});
+            this.metricsCombobox.Location = new System.Drawing.Point(10, 320);
+            this.metricsCombobox.Name = "metricsCombobox";
+            this.metricsCombobox.Size = new System.Drawing.Size(174, 21);
+            this.metricsCombobox.TabIndex = 15;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(10, 303);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(92, 13);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Versioning metrics";
             // 
             // GitInfoTab2Button
             // 
@@ -315,14 +337,13 @@
             this.tabPage3.Text = "tabPage3";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // changesTrackbar
+            // changeInfoText
             // 
-            this.changesTrackbar.Location = new System.Drawing.Point(0, 68);
-            this.changesTrackbar.Name = "changesTrackbar";
-            this.changesTrackbar.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.changesTrackbar.Size = new System.Drawing.Size(45, 437);
-            this.changesTrackbar.TabIndex = 0;
-            this.changesTrackbar.Value = 10;
+            this.changeInfoText.Location = new System.Drawing.Point(52, 68);
+            this.changeInfoText.Name = "changeInfoText";
+            this.changeInfoText.Size = new System.Drawing.Size(132, 130);
+            this.changeInfoText.TabIndex = 2;
+            this.changeInfoText.Text = "Change Info Text";
             // 
             // exitDiffTab
             // 
@@ -334,35 +355,14 @@
             this.exitDiffTab.UseVisualStyleBackColor = true;
             this.exitDiffTab.Click += new System.EventHandler(this.exitDiffTab_Click);
             // 
-            // changeInfoText
+            // changesTrackbar
             // 
-            this.changeInfoText.Location = new System.Drawing.Point(52, 68);
-            this.changeInfoText.Name = "changeInfoText";
-            this.changeInfoText.Size = new System.Drawing.Size(132, 130);
-            this.changeInfoText.TabIndex = 2;
-            this.changeInfoText.Text = "Change Info Text";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(10, 303);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(92, 13);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "Versioning metrics";
-            // 
-            // metricsCombobox
-            // 
-            this.metricsCombobox.FormattingEnabled = true;
-            this.metricsCombobox.Items.AddRange(new object[] {
-            "Every workbook change",
-            "After 1 minute without changes",
-            "Every minute",
-            "Fully manual"});
-            this.metricsCombobox.Location = new System.Drawing.Point(10, 320);
-            this.metricsCombobox.Name = "metricsCombobox";
-            this.metricsCombobox.Size = new System.Drawing.Size(174, 21);
-            this.metricsCombobox.TabIndex = 15;
+            this.changesTrackbar.Location = new System.Drawing.Point(0, 68);
+            this.changesTrackbar.Name = "changesTrackbar";
+            this.changesTrackbar.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.changesTrackbar.Size = new System.Drawing.Size(45, 437);
+            this.changesTrackbar.TabIndex = 0;
+            this.changesTrackbar.Value = 10;
             // 
             // TaskPane
             // 

@@ -178,7 +178,7 @@ namespace GitExcelAddIn
             if (full)
             {
                 lastCommit = 0;
-                allcommits.Add(new JProperty("reset","all"));
+                allcommits.Add(new JObject(new JProperty("reset","all")));
             }
 
 

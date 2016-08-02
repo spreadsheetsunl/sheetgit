@@ -208,12 +208,12 @@ function refreshLog(json) {
 
 
 $("button").click(function () {
-    if ($(this).text() == 'Diff Mode') {
+    if ($(this).text() == 'Comparison Mode') {
         $(this).html('Normal Mode');
         $('body').css({ 'background': "#cdc3c3" });
         diffMode = true;
     } else {
-        $(this).html('Diff Mode');
+        $(this).html('Comparison Mode');
         $('body').css({ 'background': "#EEE" });
         diffMode = false;
     }
