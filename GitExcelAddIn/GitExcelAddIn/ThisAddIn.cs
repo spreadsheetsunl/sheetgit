@@ -517,8 +517,8 @@ namespace GitExcelAddIn
                             if (!ourVal.Equals(theirVal))
                             {
                                 toChange[change.Name] = new JObject();
-                                toChange[change.Name][whatHappened.Name] = new JArray(theirVal.ToString(Formatting.None),
-                                    ourVal.ToString(Formatting.None));
+                                toChange[change.Name] = new JArray(change.Value.ToString(Formatting.None),
+                                    ourChanges[change.Name].ToString(Formatting.None));
                             }
                         }
                     }

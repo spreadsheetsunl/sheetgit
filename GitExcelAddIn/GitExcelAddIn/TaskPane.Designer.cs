@@ -129,6 +129,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.tabPage1.Controls.Add(this.mergebutton);
             this.tabPage1.Controls.Add(this.infoLabel);
             this.tabPage1.Controls.Add(this.label3);
@@ -141,7 +142,6 @@
             this.tabPage1.Size = new System.Drawing.Size(190, 663);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // mergebutton
             // 
@@ -164,6 +164,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.BackColor = System.Drawing.SystemColors.ControlLight;
             this.tabPage2.Controls.Add(this.metricsCombobox);
             this.tabPage2.Controls.Add(this.label6);
             this.tabPage2.Controls.Add(this.GitInfoTab2Button);
@@ -186,7 +187,6 @@
             this.tabPage2.Size = new System.Drawing.Size(190, 663);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // metricsCombobox
             // 
@@ -336,6 +336,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.BackColor = System.Drawing.SystemColors.ControlLight;
             this.tabPage3.Controls.Add(this.label8);
             this.tabPage3.Controls.Add(this.legendValues);
             this.tabPage3.Controls.Add(this.label7);
@@ -348,7 +349,6 @@
             this.tabPage3.Size = new System.Drawing.Size(190, 663);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "tabPage3";
-            this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // label8
             // 
@@ -408,6 +408,7 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.BackColor = System.Drawing.SystemColors.ControlLight;
             this.tabPage4.Controls.Add(this.conflictNumberLabel);
             this.tabPage4.Controls.Add(this.conflictCountLabel);
             this.tabPage4.Controls.Add(this.label9);
@@ -417,7 +418,6 @@
             this.tabPage4.Size = new System.Drawing.Size(190, 663);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "tabPage4";
-            this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // conflictCountLabel
             // 
@@ -433,11 +433,11 @@
             // 
             this.label9.Location = new System.Drawing.Point(7, 21);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(177, 88);
+            this.label9.Size = new System.Drawing.Size(177, 119);
             this.label9.TabIndex = 0;
             this.label9.Text = "Conflicts have been found between the trunk and your branch. \r\n\r\nYou will see the" +
-    "m as cells in yellow. Click them and use the dropdown\r\nto choose which version t" +
-    "o use.";
+    "m as cells in yellow saying <CONFLICT>. \r\n\r\nClick them and use the dropdown\r\nto " +
+    "choose which version to use.";
             // 
             // conflictNumberLabel
             // 
@@ -455,6 +455,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
+            this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.Controls.Add(this.tabControl1);
             this.Name = "TaskPane";
             this.Size = new System.Drawing.Size(198, 689);
