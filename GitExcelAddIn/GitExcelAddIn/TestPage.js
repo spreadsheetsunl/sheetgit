@@ -1,19 +1,16 @@
-﻿/***********************
+/***********************
  *  CUSTOM TEMPLATES   *
  ***********************/
 //#5353ac", "#008fb5", "#f1c109"
 
 var kelly_colors = [
-    "#817066", // Medium Gray
+    "#FFB300", // Vivid Yellow
     "#803E75", // Strong Purple
+    "#FF6800", // Vivid Orange
+    "#A6BDD7", // Very Light Blue
     "#C10020", // Vivid Red
     "#CEA262", // Grayish Yellow
-    "#FF6800", // Vivid Orange
-    "#FFB300", // Vivid Yellow
-    "#A6BDD7", // Very Light Blue
-
-
-
+    "#817066", // Medium Gray
 
     // The following don't work well for people with defective color vision
     "#007D34", // Vivid Green
@@ -32,7 +29,7 @@ var kelly_colors = [
 ]
 
 var last_kelly = 0;
-var diffMode = false;
+var difftoggle = false;
 
 var myTemplateConfig = {
     arrow: {
@@ -58,7 +55,7 @@ var myTemplateConfig = {
             color: "black"
         },
         tooltipHTMLFormatter: function (commit) {
-            return "" + commit.realMessage;
+            return "" + commit.realMessage; 
         }
     }
 };
@@ -76,9 +73,19 @@ var gitGraph = new GitGraph();
 gitGraph.template = myTemplate;
 
 branches["master"] = [
-    gitGraph.branch("master"), last_kelly++];
+    gitGraph.branch({name: "master", color: "#FFFFFF"}), last_kelly++];
 
 var selectedCommit;
+
+gitGraph.commit();
+  var b = gitGraph.branch("dwdw");
+  gitGraph.commit();
+  var c = gitGraph.commit("ashdasd");
+  console.log(c);
+  gitGraph.commit("ashdasd");
+  gitGraph.commit("ashdasd");
+  var g = gitGraph.branch({name: "Sheet", parentCommit: b.commits[0]});
+  gitGraph.commit("ashdasd");
 
 /***********************
  *       EVENTS        *
@@ -91,9 +98,9 @@ gitGraph.canvas.addEventListener("commit:mouseover", function (event) {
 // Attach a handler to the commit
 
 function comTouch(commit, restore) {
-    console.log("You just clicked my commit. - " + window.diffMode, commit);
+    console.log("You just clicked my commit. - "+window.diffMode, commit);
 
-    if (window.diffMode === false) {
+//    if (window.diffMode === false) {
         commit.dotColor = "white";
         commit.dotStrokeWidth = 10;
 
@@ -130,103 +137,78 @@ function comTouch(commit, restore) {
         selectedCommit = commit;
 
         commit.parent.render();
-    } else {
+   /* } else {
         //Begin diffing
         window.external.BeginDiff(commit.sha1);
-    }
-
-}
-
-function toggleDiff() {
-    $("#diffButton").click();
+    }*/
+    
 }
 
 function refreshLog(json) {
-    if (window.diffMode === true) {
-        this.toggleDiff();
-    }
     var parsed = JSON.parse(json);
     var master = branches["master"][0];
     var finalCommit;
     var i = 1;
-    //debugger;
-    for (var pindex in parsed) {
-        var key = Object.keys(parsed[pindex])[0];
-        //if (parsed.hasOwnProperty(key)) {
-        //if(key === "head") continue;
-        if (key === "reset") {
-            gitGraph = new GitGraph();
-            last_kelly = 0;
-            gitGraph.template = myTemplate;
-            branches = new Object();
-            commits = new Object();
-            branches["master"] = [
-                gitGraph.branch("master"), last_kelly++];
-            continue;
-        }
-        var entry = parsed[pindex][key];
-        /*if (first && commits["latest"] != null) {
-            commits["latest"].sha1 = key;
-            commits[entry["parent"]] = commits["latest"];
-            first = false;
-            continue;
-        }*/
-
-        var parent = entry["parent"];
-        //<b>Commit message</b><br><i>Cell C28 = 15/09/2001</i>"
-        if (branches[entry["branch"]] == null) {
-            branches[entry["branch"]] = [gitGraph.branch({ parentCommit: commits[entry["parent"]], name: entry["branch"] }), last_kelly];
-        }
-
-        var br = entry["branch"];
-        var auth = entry["author"];
-        var brr = entry.branch;
-
-        if (commits[key] == null) {
-            if (entry["merge"] != null) {
-                branches[entry["merge"]][0].merge(master,{
-                    realMessage: "<b>" + entry["message"] + "</b><br><i>" + entry["branch"] + " <" + "e" + "><br>" + "d" + "</i>",
-                    message: "V" + (Object.keys(commits).length + 1),
-                    onClick: function (commit) { comTouch(commit, true); },
-                    changes: "Placeholder for changes",
-                    sha1: key,
-                    dotColor: kelly_colors[branches[entry["branch"]][1]]
-                });
+    debugger;
+    for (var key in parsed) {
+        if (parsed.hasOwnProperty(key)) {
+            //if(key === "head") continue;
+            if (key === "reset") {
+                gitGraph = new GitGraph();
+                last_kelly = 0;
+                gitGraph.template = myTemplate;
+                branches = new Object();
+                commits = new Object();
+                branches["master"] = [
+                    gitGraph.branch("master"), last_kelly++];
+                continue;
             }
-            else {
-                branches[entry["branch"]][0].commit({
-                    realMessage: "<b>" + entry["message"] + "</b><br><i>" + entry["branch"] + " <" + "e" + "><br>" + "d" + "</i>",
-                    message: "V" + (Object.keys(commits).length + 1),
-                    onClick: function (commit) { comTouch(commit, true); },
-                    changes: "Placeholder for changes",
-                    sha1: key,
-                    dotColor: kelly_colors[branches[entry["branch"]][1]]
-                });
+            var entry = parsed[key];
+            /*if (first && commits["latest"] != null) {
+                commits["latest"].sha1 = key;
+                commits[entry["parent"]] = commits["latest"];
+                first = false;
+                continue;
+            }*/
+
+            var parent = entry["parent"];
+            //<b>Commit message</b><br><i>Cell C28 = 15/09/2001</i>"
+            if (branches[entry["branch"]] == null) {
+                branches[entry["branch"]] = [gitGraph.branch({ parentCommit: commits[entry["parent"]], name: entry["branch"] }), last_kelly++];
             }
+
+            var br = entry["branch"];
+            var auth = entry["author"];
+            var brr = entry.branch;
+
+            branches[entry["branch"]][0].commit({
+                realMessage: "<b>" + entry["message"] + "</b><br><i>" + entry["branch"] + " <" + "e" + "><br>" + "d" + "</i>",
+                message: "V"+Object.keys(commits).length+1,
+                onClick: function (commit) { comTouch(commit, true); },
+                changes: "Placeholder for changes",
+                sha1: key,
+                dotColor: branches[entry["branch"]][1]
+            });
             commits[key] = branches[entry["branch"]][0].commits.slice(-1)[0];
             finalCommit = commits[key];
+
+
+            i++;
         }
-
-
-        i++;
-        //}
     }
     var com = finalCommit;
     comTouch(com, false);
     selectedCommit.parent.render();
 }
 
-
-
 $("button").click(function () {
-    if ($(this).text() == 'Comparison Mode') {
+    if ($(this).text() == 'Diff Mode') {
         $(this).html('Normal Mode');
         $('body').css({ 'background': "#cdc3c3" });
         diffMode = true;
     } else {
-        $(this).html('Comparison Mode');
+        $(this).html('Diff Mode');
         $('body').css({ 'background': "#EEE" });
         diffMode = false;
     }
 });
-

@@ -18,7 +18,11 @@ namespace GitExcelAddIn
         {
             Thread t = new System.Threading.Thread(delegate ()
             {
-                ThisAddIn.ReloadWorkbook(id);
+                if (ThisAddIn.Repo.Index.Conflicts.Any())
+                {
+                    ThisAddIn.sheetGitPane.UpdateInfoLabel("Please resolve all conflicts before comparing.");
+                }
+                else ThisAddIn.ReloadWorkbook(id);
             });
             t.Start();
         }

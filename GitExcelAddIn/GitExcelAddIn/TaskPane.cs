@@ -23,9 +23,10 @@ namespace GitExcelAddIn
 
         private int _previousValue = 5;
         private JEnumerable<JToken> _currentChanges;
-        private Range _lastChange;
+        private Range _lastChangeRange;
+        private int _lastChangeValue;
         private IKeyboardMouseEvents _m_GlobalHook;
-        delegate void SetChangesCallback(JObject changes);
+        delegate void SetChangesCallback(JObject changes, bool forwardInTime = false);
 
         public TaskPane()
         {
@@ -287,25 +288,26 @@ namespace GitExcelAddIn
             }
         }
 
-        public void MovetoDiffTab(JObject changes)
+        public void MovetoDiffTab(JObject changes, bool forwardInTimeDiff = false)
         {
             if (changesTrackbar.InvokeRequired)
             {
                 SetChangesCallback d = MovetoDiffTab;
-                Invoke(d, changes);
+                Invoke(d, changes, forwardInTimeDiff);
             }
             else
             {
+                ThisAddIn.editMode = false;
                 JProperty first = (JProperty)changes.First;
                 changesTrackbar.Maximum = changes.Count-1;
                 changesTrackbar.Value = changesTrackbar.Maximum;
-                changeInfoText.Text = $"Cell Range: {first.Name}\n\nValue: {first.Value}";
+                _lastChangeValue = changesTrackbar.Maximum;
+                changeInfoText.Text = $"Cell Range: {first.Name}\nDiff. Values:\n{first.Value["Value"] ?? "Nothing"}\n\nDiff. Formulae:\n{first.Value["Value2"] ?? "Nothing"}";
                 /*Worksheet sheet = ThisAddIn.ExcelApplication.ActiveSheet;
                 sheet.(first.Name);*/
                 var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
-                _lastChange = sheet.Range[first.Name, first.Name];
-                _lastChange.Interior.Color = XlRgbColor.rgbYellowGreen;
-                _lastChange.Borders.Color = XlRgbColor.rgbGray;
+                _lastChangeRange = sheet.Range[first.Name, first.Name];
+                _lastChangeRange.Interior.Color = XlRgbColor.rgbYellowGreen;
                 _currentChanges = changes.Children();
                 tabControl1.SelectTab("tabPage3");
             }
@@ -313,13 +315,23 @@ namespace GitExcelAddIn
 
         private void changesTrackbar_ValueChanged(object sender, EventArgs e)
         {
-            _lastChange.Interior.Color = XlRgbColor.rgbWhite;
-            JProperty c = (JProperty) _currentChanges.Skip(changesTrackbar.Maximum - changesTrackbar.Value).Take(1).Single();
-            changeInfoText.Text = $"Cell Range: {c.Name}\n\nValue: {c.Value}";
-            var sheet = (Worksheet) ThisAddIn.ExcelApplication.ActiveSheet;
-            _lastChange = sheet.Range[c.Name, c.Name];
-            _lastChange.Interior.Color = XlRgbColor.rgbYellowGreen;
-            _lastChange.Borders.Color = XlRgbColor.rgbGray;
+            _lastChangeRange.Interior.ColorIndex = 0;
+            JProperty c = (JProperty)_currentChanges.Skip(changesTrackbar.Maximum - changesTrackbar.Value).Take(1).Single();
+            changeInfoText.Text = $"Cell Range: {c.Name}\nDiff. Values:\n{c.Value["Value"] ?? "Nothing"}\n\nDiff. Formulae:\n{c.Value["Value2"] ?? "Nothing"}";
+            var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
+            var currentRange = sheet.Range[c.Name, c.Name];
+            currentRange.Interior.Color = XlRgbColor.rgbYellowGreen;
+            if (changesTrackbar.Value < _lastChangeValue)
+            {
+                _lastChangeRange.Value2 = c.Value["Value2"];
+            }
+            else
+            {
+                currentRange.Value2 = c.Value["Value"];
+            }
+
+            _lastChangeValue = changesTrackbar.Value;
+            _lastChangeRange = currentRange;
         }
 
         public void logout()
@@ -330,14 +342,43 @@ namespace GitExcelAddIn
 
         private void mergebutton_Click(object sender, EventArgs e)
         {
-            ThisAddIn.Merge();
+            if (!ThisAddIn.Repo.Commits.Any() || ThisAddIn.Repo.Head.FriendlyName == "master" ||
+                ThisAddIn.Repo.Head.FriendlyName == "(no branch)")
+            {
+                ThisAddIn.sheetGitPane.UpdateInfoLabel("You must be at the tip of a branch to merge.");
+            } else if(ThisAddIn.Repo.Index.Conflicts.Any()) ThisAddIn.sheetGitPane.UpdateInfoLabel("Please resolve all conflicts before merging.");
+            else ThisAddIn.Merge();
         }
 
         private void exitDiffTab_Click(object sender, EventArgs e)
         {
-            _lastChange.Interior.Color = XlRgbColor.rgbWhite;
-            _lastChange.Borders.Color = XlRgbColor.rgbGray;
+            _lastChangeRange.Interior.ColorIndex = 0;
+            var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
+            foreach (JProperty ch in _currentChanges)
+            {
+                var currentRange = sheet.Range[ch.Name, ch.Name];
+                currentRange.Value2 = ch.Value["Value"];
+
+            }
+            ThisAddIn.editMode = true;
             tabControl1.SelectTab("tabPage1");
+        }
+
+        public void DecreaseConflictLabel(int number)
+        {
+            var current = int.Parse(conflictNumberLabel.Text);
+            UpdateConflictLabel(current-number);
+
+        }
+
+        public void UpdateConflictLabel(int number)
+        {
+            if(number > 0) { 
+            tabControl1.SelectTab("tabPage4");
+            this.conflictNumberLabel.Text = $"{number}";
+            }
+            else tabControl1.SelectTab("tabPage1");
+
         }
 
 

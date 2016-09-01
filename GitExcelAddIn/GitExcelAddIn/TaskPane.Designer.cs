@@ -54,14 +54,22 @@
             this.bitbucketButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.label8 = new System.Windows.Forms.Label();
+            this.legendValues = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.changeInfoText = new System.Windows.Forms.Label();
             this.exitDiffTab = new System.Windows.Forms.Button();
             this.changesTrackbar = new System.Windows.Forms.TrackBar();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.conflictCountLabel = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.conflictNumberLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.changesTrackbar)).BeginInit();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // button2
@@ -82,6 +90,7 @@
             this.label3.Size = new System.Drawing.Size(98, 13);
             this.label3.TabIndex = 7;
             this.label3.Text = "Current Changes: 7";
+            this.label3.Visible = false;
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // webBrowser1
@@ -110,6 +119,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -326,6 +336,9 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.label8);
+            this.tabPage3.Controls.Add(this.legendValues);
+            this.tabPage3.Controls.Add(this.label7);
             this.tabPage3.Controls.Add(this.changeInfoText);
             this.tabPage3.Controls.Add(this.exitDiffTab);
             this.tabPage3.Controls.Add(this.changesTrackbar);
@@ -336,6 +349,35 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "tabPage3";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.ForeColor = System.Drawing.Color.Purple;
+            this.label8.Location = new System.Drawing.Point(55, 334);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(49, 13);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "Formulas";
+            // 
+            // legendValues
+            // 
+            this.legendValues.AutoSize = true;
+            this.legendValues.ForeColor = System.Drawing.Color.Green;
+            this.legendValues.Location = new System.Drawing.Point(55, 321);
+            this.legendValues.Name = "legendValues";
+            this.legendValues.Size = new System.Drawing.Size(39, 13);
+            this.legendValues.TabIndex = 4;
+            this.legendValues.Text = "Values";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(55, 299);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(46, 13);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "Legend:";
             // 
             // changeInfoText
             // 
@@ -364,6 +406,50 @@
             this.changesTrackbar.TabIndex = 0;
             this.changesTrackbar.Value = 10;
             // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.conflictNumberLabel);
+            this.tabPage4.Controls.Add(this.conflictCountLabel);
+            this.tabPage4.Controls.Add(this.label9);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(190, 663);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "tabPage4";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // conflictCountLabel
+            // 
+            this.conflictCountLabel.AutoSize = true;
+            this.conflictCountLabel.ForeColor = System.Drawing.Color.DarkRed;
+            this.conflictCountLabel.Location = new System.Drawing.Point(7, 154);
+            this.conflictCountLabel.Name = "conflictCountLabel";
+            this.conflictCountLabel.Size = new System.Drawing.Size(98, 13);
+            this.conflictCountLabel.TabIndex = 1;
+            this.conflictCountLabel.Text = "Conflicts remaining:";
+            // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(7, 21);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(177, 88);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "Conflicts have been found between the trunk and your branch. \r\n\r\nYou will see the" +
+    "m as cells in yellow. Click them and use the dropdown\r\nto choose which version t" +
+    "o use.";
+            // 
+            // conflictNumberLabel
+            // 
+            this.conflictNumberLabel.AutoSize = true;
+            this.conflictNumberLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.conflictNumberLabel.ForeColor = System.Drawing.Color.Maroon;
+            this.conflictNumberLabel.Location = new System.Drawing.Point(111, 154);
+            this.conflictNumberLabel.Name = "conflictNumberLabel";
+            this.conflictNumberLabel.Size = new System.Drawing.Size(21, 13);
+            this.conflictNumberLabel.TabIndex = 2;
+            this.conflictNumberLabel.Text = "99";
+            // 
             // TaskPane
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -381,6 +467,8 @@
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.changesTrackbar)).EndInit();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -415,5 +503,12 @@
         private System.Windows.Forms.TrackBar changesTrackbar;
         private System.Windows.Forms.ComboBox metricsCombobox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label legendValues;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label conflictCountLabel;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Label conflictNumberLabel;
     }
 }

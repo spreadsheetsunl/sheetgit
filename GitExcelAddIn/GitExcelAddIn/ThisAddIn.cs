@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -31,6 +32,10 @@ namespace GitExcelAddIn
         public static bool OnlineFunctionsEnabled;
         public static TaskPane sheetGitPane;
         public static Excel.Application ExcelApplication;
+        public static bool editMode;
+        private static bool conflictResolutionMode;
+        private static Branch mergeSource;
+        private static List<string> conflicts; 
 
 
         private void ThisAddIn_Startup(object sender, EventArgs e)
@@ -40,6 +45,7 @@ namespace GitExcelAddIn
             ((Excel.AppEvents_Event)this.Application).NewWorkbook += new Excel.AppEvents_NewWorkbookEventHandler(Application_WorkbookStart);
             SheetGitPath = Utils.GenerateFilePath();
 
+            editMode = true;
             var infoText = File.ReadAllText($"{SheetGitPath}/info.json");
             ExcelApplication = this.Application;
             Info = JObject.Parse(infoText);
@@ -114,92 +120,127 @@ namespace GitExcelAddIn
         {
             try
             {
-                Debug.WriteLine("Worksheet Changed");
-                Excel.Worksheet sheet = (Excel.Worksheet)sh;
-                var wb = this.Application.ActiveWorkbook;
-                var lastSheet = (Excel.Worksheet)wb.Sheets[wb.Sheets.Count];
-
-
-                //
-                JObject changes = null;
-
-                if (lastSheet.Visible == Excel.XlSheetVisibility.xlSheetHidden)
+                if (conflictResolutionMode)
                 {
-                    changes = DetectChanges(wb, target);
-                    ThisAddIn.ExcelApplication.DisplayAlerts = false;
-                    lastSheet.Delete();
-                    ThisAddIn.ExcelApplication.DisplayAlerts = false;
-
+                    SheetChangeInConflictMode(sh, target);
                 }
-                sheet.Copy(After: sheet);
-                lastSheet = (Excel.Worksheet)wb.Sheets[wb.Sheets.Count];
-                lastSheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
-                if (changes == null) return;
-                //
-
-                if (!String.IsNullOrEmpty(wb.Path) && changes != null) //ficheiro já foi salvo
+                else if (editMode)
                 {
+                    Debug.WriteLine("Worksheet Changed");
+                    Excel.Worksheet sheet = (Excel.Worksheet)sh;
+                    var wb = this.Application.ActiveWorkbook;
+                    var lastSheet = (Excel.Worksheet)wb.Sheets[wb.Sheets.Count];
 
 
-                    this.Application.ActiveWorkbook.Save();
-                    if (Repo == null) InitRepo();
-                    wb.SaveCopyAs(FilePath + "\\" + wb.Name);
-                    RepositoryStatus status = Repo.RetrieveStatus();
+                    //
+                    JObject changes = null;
 
-                    if (status.IsDirty)
+                    if (lastSheet.Visible == Excel.XlSheetVisibility.xlSheetHidden)
                     {
-                        if (Info["name"] == null || Info["email"] == null)
-                        {
-                            sheetGitPane.UpdateInfoLabel("Please fill in User Information in Settings");
-                        }
-                        else
-                        {
+                        changes = DetectChanges(wb, target);
+                        ThisAddIn.ExcelApplication.DisplayAlerts = false;
+                        lastSheet.Delete();
+                        ThisAddIn.ExcelApplication.DisplayAlerts = true;
 
-                            if (Repo.Commits.Any() && (Repo.Head.FriendlyName == "master" || Repo.Head.FriendlyName == "(no branch)"))
+                    }
+                    sheet.Copy(After: sheet);
+                    lastSheet = (Excel.Worksheet)wb.Sheets[wb.Sheets.Count];
+                    lastSheet.Visible = Excel.XlSheetVisibility.xlSheetHidden;
+                    if (changes == null) return;
+                    //
+
+                    if (!String.IsNullOrEmpty(wb.Path) && changes != null) //ficheiro já foi salvo
+                    {
+
+
+                        this.Application.ActiveWorkbook.Save();
+                        if (Repo == null) InitRepo();
+                        wb.SaveCopyAs(FilePath + "\\" + wb.Name);
+                        RepositoryStatus status = Repo.RetrieveStatus();
+
+                        if (status.IsDirty)
+                        {
+                            if (Info["name"] == null || Info["email"] == null)
                             {
-                                Repo.Checkout(Repo.CreateBranch(Info["name"].ToString() + Repo.Commits.Count()));
+                                sheetGitPane.UpdateInfoLabel("Please fill in User Information in Settings");
+                            }
+                            else
+                            {
+
+                                if (Repo.Commits.Any() && !Repo.Index.Conflicts.Any( )&& (Repo.Head.FriendlyName == "master" || Repo.Head.FriendlyName == "(no branch)"))
+                                {
+                                    Repo.Checkout(Repo.CreateBranch(Info["name"].ToString() + Repo.Commits.Count()));
+                                    if (Repo.Network.Remotes.Any())
+                                    {
+                                        Repo.Branches.Update(Repo.Head,
+                                            b => b.Remote = Repo.Network.Remotes.FirstOrDefault().Name,
+                                            b => b.UpstreamBranch = Repo.Head.CanonicalName);
+                                    }
+
+                                }
+                                Commit(changes);
+                                sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog());
                                 if (Repo.Network.Remotes.Any())
                                 {
-                                    Repo.Branches.Update(Repo.Head,
-                                        b => b.Remote = Repo.Network.Remotes.FirstOrDefault().Name,
-                                        b => b.UpstreamBranch = Repo.Head.CanonicalName);
-                                }
+                                    PushOptions options = new PushOptions();
+                                    options.CredentialsProvider = new CredentialsHandler(
+                                        (url, usernameFromUrl, types) =>
+                                            new UsernamePasswordCredentials()
+                                            {
+                                                Username = Info["username"].ToString(),
+                                                Password = Info["password"].ToString()
+                                            });
+                                    try
+                                    {
+                                        Repo.Network.Push(Repo.Head, options);
+                                    }
+                                    catch (LibGit2SharpException e)
+                                    {
+                                        sheetGitPane.UpdateInfoLabel("Cannot push version online. Please confirm your Bitbucket data in Settings.");
+                                    }
 
+                                }
+                                else if (OnlineFunctionsEnabled)
+                                {
+                                    //check if remote repos exist
+                                    //if not, create
+                                    //create push options
+                                }
                             }
-                            Commit(changes);
-                            sheetGitPane.UpdateGitGraph(Bitbucket.GetGitLog());
-                            if (Repo.Network.Remotes.Any())
-                            {
-                                PushOptions options = new PushOptions();
-                                options.CredentialsProvider = new CredentialsHandler(
-                                    (url, usernameFromUrl, types) =>
-                                        new UsernamePasswordCredentials()
-                                        {
-                                            Username = Info["username"].ToString(),
-                                            Password = Info["password"].ToString()
-                                        });
-                                try
-                                {
-                                    Repo.Network.Push(Repo.Head, options);
-                                }
-                                catch (LibGit2SharpException e)
-                                {
-                                    sheetGitPane.UpdateInfoLabel("Cannot push version online. Please confirm your Bitbucket data in Settings.");
-                                }
 
-                            }
-                            else if (OnlineFunctionsEnabled)
-                            {
-                                //check if remote repos exist
-                                //if not, create
-                                //create push options
-                            }
                         }
-
                     }
                 }
             }
             catch (NoChangesExistException e) { Debug.WriteLine("No changes found"); }
+
+        }
+
+        void SheetChangeInConflictMode(object sh, Excel.Range target)
+        {
+            var x = target.Address;
+            if (!conflicts.Any())
+            {
+                conflictResolutionMode = false;
+                sheetGitPane.UpdateInfoLabel("All conflicts resolved.");
+            }
+            else if (conflicts.Remove(x))
+            {
+                try
+                {
+                    JObject item = JObject.Parse(target.Value2);
+                    if (item["Value"] != null) target.Value2 = item["Value"];
+                    if (item["Formula"] != null) target.Formula = item["Formula"];
+                    target.Interior.ColorIndex = 0;
+                    target.Validation.Delete();
+                    sheetGitPane.DecreaseConflictLabel(1);
+                }
+                catch (Exception)
+                {
+                    conflicts.Add(x);
+                }
+               
+            }
         }
 
         void Application_SheetCalculate(object sh)
@@ -248,7 +289,8 @@ namespace GitExcelAddIn
 
         public static void Diff(string id)
         {
-            var commitB = Repo.Commits.First(c => c.Sha == id); //Other commit
+            var filter = new CommitFilter { IncludeReachableFrom = id };
+            var commitB = Repo.Commits.QueryBy(filter).First(); //Other commit
             //var branchA = Repo.Branches.First(b => b.Commits.Contains(commitA));
             var commitA = Repo.Head.Tip; //Current commit
             var ancestor = Utils.GetMergeBase(commitA, commitB);
@@ -294,9 +336,12 @@ namespace GitExcelAddIn
             {
                 if (changes[0][p.Name] == null) //Only second
                 {
-                    realChanges[p.Name] = new JProperty("Value2", p.Value["Value"]);
+                    realChanges[p.Name]["Value2"] = p.Value["Value"];
                 }
             }
+
+            //checkout before moving on to the ancestor
+            //ensure return checkout when leaving Comparison Mode
             ThisAddIn.sheetGitPane.MovetoDiffTab(realChanges);
         }
 
@@ -341,6 +386,11 @@ namespace GitExcelAddIn
             Tree[id]["author"]["name"] = author.Name;
             Tree[id]["branch"] = Repo.Head.FriendlyName;
             string parent = null;
+            if (Repo.Index.Conflicts.Any())
+            {
+                Tree[id]["merge"] = mergeSource.FriendlyName;
+                mergeSource = null;
+            }
             /*if ((string) Tree["head"] != "")
             {
                 Tree[id]["parent"] = Tree["head"];
@@ -382,6 +432,7 @@ namespace GitExcelAddIn
         public static void Merge()
         {
             var commitB = Repo.Head.Tip; //ToMerge
+            mergeSource = Repo.Head;
             CheckoutOptions opt = new CheckoutOptions();
             opt.CheckoutModifiers = CheckoutModifiers.None;
             Repo.Checkout(Repo.Branches["master"], opt);
@@ -391,7 +442,6 @@ namespace GitExcelAddIn
             m.CommitOnSuccess = false;
             Repo.Merge(commitB, GenerateSignature(), m);
             bool free = Repo.Index.IsFullyMerged;
-            var conflicts = Repo.Index.Conflicts;
             if (!Repo.Index.Conflicts.Any()) //Fast Forward merge
             {
                 Dictionary<string, string> iterated = new Dictionary<string, string>();
@@ -443,8 +493,10 @@ namespace GitExcelAddIn
             }
             else
             {
-                Tree = null;
-                BuildTree(masterCommits);
+                editMode = false;
+                conflicts = new List<string>();
+                /*Tree = null;
+                BuildTree(masterCommits);*/
                 var newCommits = File.ReadAllText($"{FilePath}/commits.json"); //Their commits
                 var theirCommits = JObject.Parse(newCommits);
 
@@ -452,39 +504,64 @@ namespace GitExcelAddIn
                 var ourChanges = Tree["latest"]["branchChanges"];
 
                 JObject toChange = new JObject();
-
+                Regex rgx = new Regex(":(.*)}");
+                var pattern = ":\"\"}";
                 foreach (JProperty change in theirChanges.Children())
                 {
-                    if (theirChanges.Children().Contains(change.Name))
+                    if (ourChanges[change.Name] != null)
                     {
                         foreach (JProperty whatHappened in change.Value)
                         {
-                            var cur = ourChanges[change.Name][whatHappened.Name];
-                            if (cur != change.Value[whatHappened.Name])
+                            var ourVal = ourChanges[change.Name][whatHappened.Name];
+                            var theirVal = change.Value[whatHappened.Name];
+                            if (!ourVal.Equals(theirVal))
                             {
-                                toChange[change.Name][whatHappened.Name] = new JArray(change.Value[whatHappened.Name], cur);
+                                toChange[change.Name] = new JObject();
+                                toChange[change.Name][whatHappened.Name] = new JArray(theirVal.ToString(Formatting.None),
+                                    ourVal.ToString(Formatting.None));
                             }
                         }
                     }
+                    else
+                    {
+                        var st = change.Value.ToString(Formatting.None);
+                        var emptyst = rgx.Replace(st, pattern);
+                        toChange[change.Name] = new JArray(st,emptyst);
+                    }
+                }
+                foreach (JProperty change in ourChanges.Children())
+                {
+                    if (theirChanges[change.Name] == null)
+                    {
+                        var st = change.Value.ToString(Formatting.None);
+                        var emptyst = rgx.Replace(st, pattern);
+                        toChange[change.Name] = new JArray(st, emptyst);
+                    }
                 }
                 Excel.Worksheet ws = ThisAddIn.ExcelApplication.ActiveSheet;
+                
                 foreach (var toCombo in toChange)
                 {
                     Excel.Range cell = ws.Range[toCombo.Key, toCombo.Key];
-
-                    var flatList = string.Join(",", ((JArray)toCombo.Value).Cast<string>().ToArray());
-
+                    conflicts.Add(toCombo.Key);
+                    var x = toCombo.Value;
+                    var flatList = string.Join(";", ((JArray)toCombo.Value).ToObject<string[]>());
+                    //var flatList = "test , test2 , sfsdf , wafwefw";
+                    cell.Value2 = "<CONFLICT>";
                     cell.Validation.Delete();
                     cell.Validation.Add(
                        Excel.XlDVType.xlValidateList,
-                       Excel.XlDVAlertStyle.xlValidAlertInformation,
+                       Excel.XlDVAlertStyle.xlValidAlertStop,
                        Excel.XlFormatConditionOperator.xlBetween,
-                       flatList,
-                       Type.Missing);
+                       flatList,Type.Missing);
 
                     cell.Validation.IgnoreBlank = true;
                     cell.Validation.InCellDropdown = true;
-                    cell.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 217, 217, 0));
+                    cell.Validation.ShowError = true;
+                    cell.Validation.ShowInput = false;
+                    cell.Validation.ErrorTitle = "Invalid value";
+                    cell.Validation.ErrorMessage = "You must choose a value from the list attached to the cell.";
+                    cell.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(255, 250, 250, 120));
                     /*var confs = newCommits.Split(new[] { "<<<<<<< HEAD" }, StringSplitOptions.None);
                     foreach (var problem in confs)
                     {
@@ -492,9 +569,10 @@ namespace GitExcelAddIn
 
 
                     }*/
-                    Repo.Index.Add("commits.json");
-                    Repo.Index.Add(FilePath);
                 }
+                editMode = true;
+                conflictResolutionMode = true;
+                sheetGitPane.UpdateConflictLabel(toChange.Count);
             }
 
             foreach (var w in Repo.RetrieveStatus().Modified)
@@ -509,6 +587,8 @@ namespace GitExcelAddIn
 
         public static void ReloadWorkbook(string id)
         {
+            var path = ExcelApplication.ActiveWorkbook.FullName;
+            var name = ExcelApplication.ActiveWorkbook.Name;
             var filter = new CommitFilter { IncludeReachableFrom = id };
             Commit commit;
             commit = ThisAddIn.Repo.Commits.QueryBy(filter).First();
@@ -519,18 +599,29 @@ namespace GitExcelAddIn
             Branch futureBranch = ThisAddIn.Repo.Branches.FirstOrDefault(b => b.Tip.Sha == id);
             var chkOptions = new CheckoutOptions();
             chkOptions.CheckoutModifiers = CheckoutModifiers.Force;
+
+            ExcelApplication.ActiveWorkbook.Close(true);
             while (File.Exists(FilePath + "/.git/index.lock"))
             {
                 Task.Delay(1000);
             }
+            Task.Delay(2000);
             if (futureBranch == null) ThisAddIn.Repo.Checkout(commit, chkOptions);
             else ThisAddIn.Repo.Checkout(futureBranch, chkOptions);
-            var path = ExcelApplication.ActiveWorkbook.FullName;
-            var name = ExcelApplication.ActiveWorkbook.Name;
+
             //Tree["head"] = id;
             //File.WriteAllText(FilePath + @"/commits.json", JsonConvert.SerializeObject(Tree, Formatting.Indented));
-            ExcelApplication.ActiveWorkbook.Close(true);
-            File.Copy(FilePath + "\\" + name, path, true);
+
+            try
+            {
+                File.Copy(FilePath + "\\" + name, path, true);
+            }
+            catch (System.IO.IOException)
+            {
+                Task.Delay(3000);
+                File.Copy(FilePath + "\\" + name, path, true);
+            }
+
             ExcelApplication.Workbooks.Open(path);
 
         }
