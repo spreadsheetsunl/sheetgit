@@ -311,7 +311,7 @@ namespace GitExcelAddIn
                 sheet.(first.Name);*/
                 var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
                 _lastChangeRange = sheet.Range[first.Name, first.Name];
-                _lastChangeRange.Interior.Color = XlRgbColor.rgbYellowGreen;
+                //_lastChangeRange.Interior.Color = XlRgbColor.rgbYellowGreen;
                 _lastChangeProperty = first;
                 _colorToDelete = _lastChangeRange;
                 _currentChanges = changes.Children();
@@ -346,23 +346,26 @@ namespace GitExcelAddIn
             var sheet = (Worksheet)ThisAddIn.ExcelApplication.ActiveSheet;
             ;
             var currentRange = sheet.Range[c.Name, c.Name];
-
+            changeInfoText.Text = $"Cell Range: {c.Name}\nDiff. Values:\n{(_lastChangeProperty.Value["Value"]) ?? (_lastChangeProperty.Value["Value2"] ?? "Nothing")}" +
+                                  $"\n\nDiff. Formulae:\n{_lastChangeProperty.Value["Formula"] ?? (_lastChangeProperty.Value["Formula2"] ?? "Nothing")}";
             if (changesTrackbar.Value < _lastChangeValue)
             {
-                _lastChangeRange.Value2 = _lastChangeProperty.Value["Value2"];
-                changeInfoText.Text = $"Cell Range: {c.Name}\nDiff. Values:\n{_lastChangeProperty.Value["Value2"] ?? "Nothing"}\n\nDiff. Formulae:\n{_lastChangeProperty.Value["Formula2"] ?? "Nothing"}";
-                if (_lastChangeProperty.Value["Value2"] == null)
+                var last = ((JProperty) _lastChangeProperty.Value.Last);
+                var val = (last.Name.EndsWith("2")) ? last.Value : null;
+                _lastChangeRange.Value2 = val;
+                if (last.Name.Contains("Value"))
                     _lastChangeRange.Interior.Color = XlRgbColor.rgbYellowGreen;
-                else _lastChangeRange.Interior.Color = XlRgbColor.rgbPurple;
+                else _lastChangeRange.Interior.ColorIndex = 39;
 
             }
             else
             {
-                _lastChangeRange.Value2 = _lastChangeProperty.Value["Value"];
-                changeInfoText.Text = $"Cell Range: {c.Name}\nDiff. Values:\n{_lastChangeProperty.Value["Value"] ?? "Nothing"}\n\nDiff. Formulae:\n{_lastChangeProperty.Value["Formula"] ?? "Nothing"}";
-                if (_lastChangeProperty.Value["Value"] == null)
+                var first = ((JProperty)_lastChangeProperty.Value.First);
+                var val = (first.Name.EndsWith("2")) ? null : first.Value;
+                _lastChangeRange.Value2 = val;
+                if (first.Name.Contains("Value"))
                     _lastChangeRange.Interior.Color = XlRgbColor.rgbYellowGreen;
-                else _lastChangeRange.Interior.Color = XlRgbColor.rgbPurple;
+                else _lastChangeRange.Interior.ColorIndex = 39;
             }
 
             _lastChangeValue = changesTrackbar.Value;
@@ -394,7 +397,8 @@ namespace GitExcelAddIn
             foreach (JProperty ch in _currentChanges)
             {
                 var currentRange = sheet.Range[ch.Name, ch.Name];
-                currentRange.Value2 = ch.Value["Value"];
+                var val = (JProperty) ch.Value.First;
+                if(!val.Name.EndsWith("2")) currentRange.Value2 = val.Value;
 
             }
             ThisAddIn.editMode = true;

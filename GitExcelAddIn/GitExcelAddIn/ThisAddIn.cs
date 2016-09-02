@@ -35,7 +35,7 @@ namespace GitExcelAddIn
         public static bool editMode;
         private static bool conflictResolutionMode;
         private static Branch mergeSource;
-        private static List<string> conflicts; 
+        private static List<string> conflicts;
 
 
         private void ThisAddIn_Startup(object sender, EventArgs e)
@@ -167,7 +167,7 @@ namespace GitExcelAddIn
                             else
                             {
 
-                                if (Repo.Commits.Any() && !Repo.Index.Conflicts.Any( )&& (Repo.Head.FriendlyName == "master" || Repo.Head.FriendlyName == "(no branch)"))
+                                if (Repo.Commits.Any() && !Repo.Index.Conflicts.Any() && (Repo.Head.FriendlyName == "master" || Repo.Head.FriendlyName == "(no branch)"))
                                 {
                                     Repo.Checkout(Repo.CreateBranch(Info["name"].ToString() + Repo.Commits.Count()));
                                     if (Repo.Network.Remotes.Any())
@@ -239,7 +239,7 @@ namespace GitExcelAddIn
                 {
                     conflicts.Add(x);
                 }
-               
+
             }
         }
 
@@ -328,16 +328,18 @@ namespace GitExcelAddIn
                 }
                 else if (changes[1][p.Name] != p.Value) //On two
                 {
+                    var name = ((JProperty)p.Value.First).Name;
                     realChanges[p.Name] = p.Value;
-                    realChanges[p.Name][p.Name+'2'] = changes[1][p.Name][p.Name];
+                    realChanges[p.Name][name + '2'] = changes[1][p.Name][name];
                 }
             }
             foreach (var p in changes[1].Properties())
             {
                 if (changes[0][p.Name] == null) //Only second
                 {
+                    var name = ((JProperty)p.Value.First).Name;
                     realChanges[p.Name] = new JObject();
-                    realChanges[p.Name][p.Name+'2'] = p.Value[p.Name];
+                    realChanges[p.Name][name + '2'] = p.Value[name];
                 }
             }
 
@@ -527,7 +529,7 @@ namespace GitExcelAddIn
                     {
                         var st = change.Value.ToString(Formatting.None);
                         var emptyst = rgx.Replace(st, pattern);
-                        toChange[change.Name] = new JArray(st,emptyst);
+                        toChange[change.Name] = new JArray(st, emptyst);
                     }
                 }
                 foreach (JProperty change in ourChanges.Children())
@@ -540,7 +542,7 @@ namespace GitExcelAddIn
                     }
                 }
                 Excel.Worksheet ws = ThisAddIn.ExcelApplication.ActiveSheet;
-                
+
                 foreach (var toCombo in toChange)
                 {
                     Excel.Range cell = ws.Range[toCombo.Key, toCombo.Key];
@@ -554,7 +556,7 @@ namespace GitExcelAddIn
                        Excel.XlDVType.xlValidateList,
                        Excel.XlDVAlertStyle.xlValidAlertStop,
                        Excel.XlFormatConditionOperator.xlBetween,
-                       flatList,Type.Missing);
+                       flatList, Type.Missing);
 
                     cell.Validation.IgnoreBlank = true;
                     cell.Validation.InCellDropdown = true;
@@ -656,15 +658,15 @@ namespace GitExcelAddIn
             else
                 mirrorRange = sheet2.Range[editedRange[0]];
 
-            if (target.Value != mirrorRange.Value)
+            if ((target.Formula != mirrorRange.Formula) && target.Formula[0] == '=')
+            {
+                token.Add("Formula", target.Formula);
+            }
+            else if (target.Value != mirrorRange.Value)
             {
                 token.Add("Value", target.Value);
             }
-            if (target.Formula != mirrorRange.Formula)
-            {
-                if (target.Formula != "" && target.Formula[0] == '=') token.Add("Formula", target.Formula);
-                else if (mirrorRange.Formula != "" && mirrorRange.Formula[0] == '=') token.Add("Formula", "");
-            }
+
             if (target.DisplayFormat.Font.Name != mirrorRange.DisplayFormat.Font.Name)
             {
                 token.Add("Font", target.DisplayFormat.Font.Name.ToString());
