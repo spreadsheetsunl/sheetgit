@@ -329,14 +329,15 @@ namespace GitExcelAddIn
                 else if (changes[1][p.Name] != p.Value) //On two
                 {
                     realChanges[p.Name] = p.Value;
-                    realChanges[p.Name]["Value2"] = changes[1][p.Name]["Value"];
+                    realChanges[p.Name][p.Name+'2'] = changes[1][p.Name][p.Name];
                 }
             }
             foreach (var p in changes[1].Properties())
             {
                 if (changes[0][p.Name] == null) //Only second
                 {
-                    realChanges[p.Name]["Value2"] = p.Value["Value"];
+                    realChanges[p.Name] = new JObject();
+                    realChanges[p.Name][p.Name+'2'] = p.Value[p.Name];
                 }
             }
 
