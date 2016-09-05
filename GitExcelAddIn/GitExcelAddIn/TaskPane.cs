@@ -429,6 +429,16 @@ namespace GitExcelAddIn
 
         }
 
+        private void downDiffButton_Click(object sender, EventArgs e)
+        {
+            macTrackBar1.Value--;
+        }
+
+        private void upDiffButton_Click(object sender, EventArgs e)
+        {
+            macTrackBar1.Value++;
+        }
+
 
         /*       public void Unsubscribe()
                {
