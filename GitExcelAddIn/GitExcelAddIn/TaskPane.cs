@@ -323,6 +323,10 @@ namespace GitExcelAddIn
         {
             if (value != _lastChangeValue) { 
             Debug.WriteLine($"trackbar: {value}");
+
+            int size = macTrackBar1.Location.Y+macTrackBar1.Size.Height / macTrackBar1.Maximum*(macTrackBar1.Maximum-macTrackBar1.Value)-8*(macTrackBar1.Maximum - macTrackBar1.Value)+4;
+            changeInfoText.Location = new System.Drawing.Point(changeInfoText.Location.X,decimal.ToInt32(size));
+
             _colorToDelete.Interior.ColorIndex = 0;
             JProperty c;
             int skipValue = macTrackBar1.Maximum - macTrackBar1.Value;

@@ -353,7 +353,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.ForeColor = System.Drawing.Color.Purple;
-            this.label8.Location = new System.Drawing.Point(6, 637);
+            this.label8.Location = new System.Drawing.Point(6, 81);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(49, 13);
             this.label8.TabIndex = 5;
@@ -363,7 +363,7 @@
             // 
             this.legendValues.AutoSize = true;
             this.legendValues.ForeColor = System.Drawing.Color.Green;
-            this.legendValues.Location = new System.Drawing.Point(6, 624);
+            this.legendValues.Location = new System.Drawing.Point(6, 68);
             this.legendValues.Name = "legendValues";
             this.legendValues.Size = new System.Drawing.Size(39, 13);
             this.legendValues.TabIndex = 4;
@@ -372,7 +372,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 602);
+            this.label7.Location = new System.Drawing.Point(6, 55);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(88, 13);
             this.label7.TabIndex = 3;
@@ -380,7 +380,7 @@
             // 
             // changeInfoText
             // 
-            this.changeInfoText.Location = new System.Drawing.Point(58, 55);
+            this.changeInfoText.Location = new System.Drawing.Point(55, 112);
             this.changeInfoText.Name = "changeInfoText";
             this.changeInfoText.Size = new System.Drawing.Size(132, 130);
             this.changeInfoText.TabIndex = 2;
@@ -447,7 +447,7 @@
             this.macTrackBar1.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.macTrackBar1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(123)))), ((int)(((byte)(125)))), ((int)(((byte)(123)))));
             this.macTrackBar1.IndentHeight = 6;
-            this.macTrackBar1.Location = new System.Drawing.Point(3, 46);
+            this.macTrackBar1.Location = new System.Drawing.Point(3, 104);
             this.macTrackBar1.Maximum = 10;
             this.macTrackBar1.Minimum = 0;
             this.macTrackBar1.Name = "macTrackBar1";
