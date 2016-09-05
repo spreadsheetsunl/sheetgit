@@ -51,7 +51,7 @@ namespace GitExcelAddIn
 
             webBrowser1.DocumentCompleted += webBrowser1_DocumentCompleted;
 
-            changesTrackbar.ValueChanged += changesTrackbar_ValueChanged;
+            macTrackBar1.ValueChanged += changesTrackbar_ValueChanged;
 
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
@@ -294,7 +294,7 @@ namespace GitExcelAddIn
 
         public void MovetoDiffTab(JObject changes, bool forwardInTimeDiff = false)
         {
-            if (changesTrackbar.InvokeRequired)
+            if (macTrackBar1.InvokeRequired)
             {
                 SetChangesCallback d = MovetoDiffTab;
                 Invoke(d, changes, forwardInTimeDiff);
@@ -303,9 +303,9 @@ namespace GitExcelAddIn
             {
                 ThisAddIn.editMode = false;
                 JProperty first = (JProperty)changes.First;
-                changesTrackbar.Maximum = changes.Count;
-                changesTrackbar.Value = changesTrackbar.Maximum;
-                _lastChangeValue = changesTrackbar.Maximum;
+                macTrackBar1.Maximum = changes.Count;
+                macTrackBar1.Value = macTrackBar1.Maximum;
+                _lastChangeValue = macTrackBar1.Maximum;
                 changeInfoText.Text = $"Cell Range: {first.Name}\nDiff. Values:\n{first.Value["Value"] ?? "Nothing"}\n\nDiff. Formulae:\n{first.Value["Formula"] ?? "Nothing"}";
                 /*Worksheet sheet = ThisAddIn.ExcelApplication.ActiveSheet;
                 sheet.(first.Name);*/
@@ -319,14 +319,16 @@ namespace GitExcelAddIn
             }
         }
 
-        private void changesTrackbar_ValueChanged(object sender, EventArgs e)
+        private void changesTrackbar_ValueChanged(object sender, decimal value)
         {
+            if (value != _lastChangeValue) { 
+            Debug.WriteLine($"trackbar: {value}");
             _colorToDelete.Interior.ColorIndex = 0;
             JProperty c;
-            int skipValue = changesTrackbar.Maximum - changesTrackbar.Value;
-            if (changesTrackbar.Value < _lastChangeValue)
+            int skipValue = macTrackBar1.Maximum - macTrackBar1.Value;
+            if (macTrackBar1.Value < _lastChangeValue)
             {
-                if (skipValue == changesTrackbar.Maximum)
+                if (skipValue == macTrackBar1.Maximum)
                 {
                     skipValue--;
                     _lastChangeRange.Interior.ColorIndex = 0;
@@ -348,7 +350,7 @@ namespace GitExcelAddIn
             var currentRange = sheet.Range[c.Name, c.Name];
             changeInfoText.Text = $"Cell Range: {c.Name}\nDiff. Values:\n{(_lastChangeProperty.Value["Value"]) ?? (_lastChangeProperty.Value["Value2"] ?? "Nothing")}" +
                                   $"\n\nDiff. Formulae:\n{_lastChangeProperty.Value["Formula"] ?? (_lastChangeProperty.Value["Formula2"] ?? "Nothing")}";
-            if (changesTrackbar.Value < _lastChangeValue)
+            if (macTrackBar1.Value < _lastChangeValue)
             {
                 var last = ((JProperty) _lastChangeProperty.Value.Last);
                 var val = (last.Name.EndsWith("2")) ? last.Value : null;
@@ -368,10 +370,11 @@ namespace GitExcelAddIn
                 else _lastChangeRange.Interior.ColorIndex = 39;
             }
 
-            _lastChangeValue = changesTrackbar.Value;
+            _lastChangeValue = macTrackBar1.Value;
             _lastChangeProperty = c;
             _colorToDelete = _lastChangeRange;
             _lastChangeRange = currentRange;
+            }
         }
 
         public void logout()

@@ -658,7 +658,7 @@ namespace GitExcelAddIn
             else
                 mirrorRange = sheet2.Range[editedRange[0]];
 
-            if ((target.Formula != mirrorRange.Formula) && target.Formula[0] == '=')
+            if (!string.IsNullOrWhiteSpace(target.Formula) && (target.Formula != mirrorRange.Formula) && target.Formula[0] == '=')
             {
                 token.Add("Formula", target.Formula);
             }
