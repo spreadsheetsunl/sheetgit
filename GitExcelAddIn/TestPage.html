@@ -1,0 +1,68 @@
+﻿<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+    <meta charset="UTF-8">
+    <title>GitGraph.js example page</title>
+    <link rel="stylesheet" type="text/css" href="css/gitgraph.css"/>
+    <!--<link rel="stylesheet" type="text/css" href="css/perfect-scrollbar.min.css"/>-->
+    <script src="js/gitgraph - Copy.js"></script>
+
+    <script src="js/jquery-2.2.3.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        if (!window.console) {
+            var console = {
+                log: function () { },
+                warn: function () { },
+                error: function () { },
+                time: function () { },
+                timeEnd: function () { }
+            }
+        }
+
+        /*function submitbutton() {
+            var str = window.external.LogIn($('#un').val(), $('#pw').val());
+            Console.log(str);
+            $("#popupLogin").popup("close");
+        }*/
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('diffButton').onclick = function () { this.value = "Normal Mode"; };
+        }, false);
+
+    </script>
+</head>
+
+<body style="background-color: #E6E6E6">
+    <button style="margin: auto; display: block;" id="diffButton">Diff Mode</button>
+    <div id="inner">
+        <canvas id="gitGraph"></canvas>
+    </div>
+
+
+    <!-- <a href="#popupLogin" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Sign in</a>
+    <div data-role="popup" id="popupLogin" data-theme="a" class="ui-corner-all">
+        <form>
+            <div style="padding:10px 20px;">
+                <h3>Please sign in</h3>
+                <label for="un" class="ui-hidden-accessible">Username:</label>
+                <input type="text" name="user" id="un" value="" placeholder="username" data-theme="a">
+                <label for="pw" class="ui-hidden-accessible">Password:</label>
+                <input type="password" name="pass" id="pw" value="" placeholder="password" data-theme="a">
+                <input type="button" value="Submit" class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check" onclick="submitbutton()">
+            </div>
+        </form>
+    </div>-->
+
+    <script src="TestPage.js"></script>
+    <!--<script src="js/perfect-scrollbar.jquery.min.js"></script>-->
+</body>
+
+</html>
