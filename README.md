@@ -13,3 +13,5 @@ The tool is still under development but we intend to have several Git features p
 - Automatic commits.
 - Creating commit messages and tags.
 - Allow collaboration of multiple users on a spreadsheet repository.
+
+More info can be found at http://spreadsheetsunl.github.io/sheetgit/.
